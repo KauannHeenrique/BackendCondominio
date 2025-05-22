@@ -1,10 +1,12 @@
 ﻿using condominio_API.Data;
 using condominio_API.Models;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
-
+using condominio_API.Services;
+using Condominio_API.Requests;
 namespace condominio_API.Controllers
 {
     [Route("api/[controller]")]
@@ -22,6 +24,35 @@ namespace condominio_API.Controllers
         public async Task<ActionResult<IEnumerable<Usuario>>> GetTodosUsuarios()
         {
             return await _context.Usuarios.Include(user => user.Apartamento).ToListAsync();
+        }
+
+
+
+        [HttpPost("Login")]
+        public async Task<IActionResult> Login([FromBody] AuthRequest request)
+        {
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Documento == request.CPF && u.Senha == request.Senha);
+
+            if (usuario == null)
+            {
+                return Unauthorized(new { mensagem = "Email ou senha inválidos." });
+            }
+
+            var newToken = new TokenService();
+
+            var token = newToken.GerarJwtToken(usuario);
+            return Ok(new
+            {
+                token,
+                usuario = new
+                {
+                    usuario.UsuarioId,
+                    usuario.Nome,
+                    usuario.Documento,
+                    usuario.NivelAcesso
+                }
+            });
         }
 
         [HttpGet("BuscarUsuarioPor")]

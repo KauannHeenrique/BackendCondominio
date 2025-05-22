@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\workspace\\Kauann_TCC\\Condominio_API\\Condominio_API\\Condominio_API.csproj": {}
+    "C:\\workspace\\tcc_kauan\\backend\\Condominio_API.csproj": {}
   },
   "projects": {
-    "C:\\workspace\\Kauann_TCC\\Condominio_API\\Condominio_API\\Condominio_API.csproj": {
+    "C:\\workspace\\tcc_kauan\\backend\\Condominio_API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\workspace\\Kauann_TCC\\Condominio_API\\Condominio_API\\Condominio_API.csproj",
+        "projectUniqueName": "C:\\workspace\\tcc_kauan\\backend\\Condominio_API.csproj",
         "projectName": "Condominio_API",
-        "projectPath": "C:\\workspace\\Kauann_TCC\\Condominio_API\\Condominio_API\\Condominio_API.csproj",
+        "projectPath": "C:\\workspace\\tcc_kauan\\backend\\Condominio_API.csproj",
         "packagesPath": "C:\\Users\\thiag\\.nuget\\packages\\",
-        "outputPath": "C:\\workspace\\Kauann_TCC\\Condominio_API\\Condominio_API\\obj\\",
+        "outputPath": "C:\\workspace\\tcc_kauan\\backend\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -51,6 +51,14 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "JWT": {
+              "target": "Package",
+              "version": "[11.0.0, )"
+            },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.16, )"
+            },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
               "version": "[8.0.13, )"
@@ -86,6 +94,10 @@
             "System.Drawing.Common": {
               "target": "Package",
               "version": "[9.0.3, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.10.0, )"
             }
           },
           "imports": [

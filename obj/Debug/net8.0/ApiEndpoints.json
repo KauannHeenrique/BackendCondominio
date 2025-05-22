@@ -555,6 +555,22 @@
     ]
   },
   {
+    "ContainingType": "condominio_API.Controllers.UsuarioController",
+    "Method": "Login",
+    "RelativePath": "api/Usuario/Login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "Condominio_API.Requests.AuthRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "condominio_API.Controllers.VisitanteController",
     "Method": "PutVisitante",
     "RelativePath": "api/Visitante/AtualizarVisitante/{id}",
