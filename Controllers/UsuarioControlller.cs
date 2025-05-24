@@ -92,37 +92,41 @@ namespace condominio_API.Controllers
             {
                 if (novoUsuario == null)
                 {
-                    return BadRequest(new { mensagem = "Por favor, preencha todos os campos" });
-                }
+                        return BadRequest(new { mensagem = "Por favor, preencha todos os campos" });
+                    }
 
-                var locatarioFirst = await _context.Usuarios.FirstOrDefaultAsync(user => user.Documento == novoUsuario.Documento
-               || user.Email == novoUsuario.Email);
+                    var locatarioFirst = await _context.Usuarios.FirstOrDefaultAsync(user => user.Documento == novoUsuario.Documento
+                   || user.Email == novoUsuario.Email);
 
-                if (locatarioFirst != null)
-                {
-                    return BadRequest(new { mensagem = "Documento ou e-mail já cadastrado. Por favor, tente novamente." });
-                }
+                    if (locatarioFirst != null)
+                    {
+                        return BadRequest(new { mensagem = "Documento ou e-mail já cadastrado. Por favor, tente novamente." });
+                    }
 
-                if (((int)novoUsuario.NivelAcesso == 2 || (int)novoUsuario.NivelAcesso == 3) && novoUsuario.ApartamentoId <= 0)
-                {
-                    return BadRequest(new { mensagem = "Síndicos e moradores devem ter um apartamento válido." });
-                }
+                    if (((int)novoUsuario.NivelAcesso == 2 || (int)novoUsuario.NivelAcesso == 3) && novoUsuario.ApartamentoId <= 0)
+                    {
+                        return BadRequest(new { mensagem = "Síndicos e moradores devem ter um apartamento válido." });
+                    }
+
+                    
+
+                    var usuarioRetornado = new  // usado pra retornar na tela os dados "required"(?)
+                    {
+                        novoUsuario.UsuarioId,
+                        novoUsuario.Nome,
+                        novoUsuario.Email,
+                        novoUsuario.NivelAcesso,
+                        novoUsuario.ApartamentoId
+                    };
+
+                    novoUsuario.Senha = "Condominio123";
 
                 _context.Usuarios.Add(novoUsuario);
                 await _context.SaveChangesAsync();
 
-                var usuarioRetornado = new  // usado pra retornar na tela os dados "required"(?)
-                {
-                    novoUsuario.UsuarioId,
-                    novoUsuario.Nome,
-                    novoUsuario.Email,
-                    novoUsuario.NivelAcesso,
-                    novoUsuario.ApartamentoId
-                };
-
                 return Ok(new { mensagem = "Usuário cadastrado com sucesso!", usuarioRetornado });
 
-            }
+                }
             catch (Exception ex)
             {
                 return StatusCode(500, new { mensagem = "Erro ao cadastrar usuário!", detalhes = ex.Message });
