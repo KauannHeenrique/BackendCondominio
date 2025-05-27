@@ -571,6 +571,22 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "condominio_API.Controllers.UsuarioController",
+    "Method": "ResetarSenha",
+    "RelativePath": "api/Usuario/ResetarSenha/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "condominio_API.Controllers.VisitanteController",
     "Method": "PutVisitante",
     "RelativePath": "api/Visitante/AtualizarVisitante/{id}",

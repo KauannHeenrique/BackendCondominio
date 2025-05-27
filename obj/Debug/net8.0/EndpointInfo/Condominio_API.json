@@ -929,6 +929,29 @@
         }
       }
     },
+    "/api/Usuario/ResetarSenha/{id}": {
+      "put": {
+        "tags": [
+          "Usuario"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Usuario/ExcluirUsuario/{id}": {
       "delete": {
         "tags": [
@@ -1366,7 +1389,6 @@
       },
       "Usuario": {
         "required": [
-          "apartamentoId",
           "codigoRFID",
           "documento",
           "email",
@@ -1413,7 +1435,8 @@
           },
           "apartamentoId": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "nullable": true
           },
           "apartamento": {
             "$ref": "#/components/schemas/Apartamento"

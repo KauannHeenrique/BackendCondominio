@@ -39,7 +39,6 @@ namespace condominio_API.Models
         public string? Telefone { get; set; }
 
 
-        [Required]
         public int? ApartamentoId { get; set; }  // apartamento vai ser opcional pelos acessos de funcionario e adm (nao moradores)
 
         [ForeignKey("ApartamentoId")]
