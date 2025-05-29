@@ -484,6 +484,22 @@
   },
   {
     "ContainingType": "condominio_API.Controllers.UsuarioController",
+    "Method": "BuscarPorRFID",
+    "RelativePath": "api/Usuario/BuscarPorRFID",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "rfid",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "condominio_API.Controllers.UsuarioController",
     "Method": "GetUsuario",
     "RelativePath": "api/Usuario/BuscarUsuarioPor",
     "HttpMethod": "GET",

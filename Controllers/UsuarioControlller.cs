@@ -198,6 +198,25 @@ namespace condominio_API.Controllers
             return NoContent();
         }
 
+        [HttpGet("BuscarPorRFID")]  // rota usada para verificar se a tag esta cadastrada
+        public async Task<IActionResult> BuscarPorRFID([FromQuery] string rfid)
+        {
+            if (string.IsNullOrWhiteSpace(rfid))
+            {
+                return BadRequest(new { mensagem = "Código RFID inválido." });
+            }
+
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.CodigoRFID == rfid);
+
+            if (usuario == null)
+            {
+                return Ok(new { authorized = false });
+            }
+
+            return Ok(new { authorized = true });
+        }
+
 
         [HttpPut("ResetarSenha/{id}")]
         public async Task<IActionResult> ResetarSenha(int id)

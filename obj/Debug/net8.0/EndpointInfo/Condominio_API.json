@@ -929,6 +929,27 @@
         }
       }
     },
+    "/api/Usuario/BuscarPorRFID": {
+      "get": {
+        "tags": [
+          "Usuario"
+        ],
+        "parameters": [
+          {
+            "name": "rfid",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Usuario/ResetarSenha/{id}": {
       "put": {
         "tags": [
@@ -1421,7 +1442,7 @@
             "format": "email"
           },
           "senha": {
-            "maxLength": 50,
+            "maxLength": 255,
             "minLength": 6,
             "type": "string"
           },
