@@ -63,7 +63,9 @@ namespace condominio_API.Data
             modelBuilder.Entity<Usuario>()
                 .HasOne(u => u.Apartamento)
                 .WithMany()
-                .HasForeignKey(u => u.ApartamentoId);
+                .HasForeignKey(u => u.ApartamentoId)
+                .IsRequired(false);  // falso para poder cadastrar funcionarios com idapartartamento vazio
+
 
             base.OnModelCreating(modelBuilder);
         }

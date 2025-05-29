@@ -40,6 +40,9 @@ namespace condominio_API.Controllers
                 return Unauthorized(new { mensagem = "Email ou senha inválidos." });
             }
 
+            Console.WriteLine($"Tentando login com CPF: {request.CPF}, Senha: {request.Senha}");
+
+
             var newToken = new TokenService();
 
             var token = newToken.GerarJwtToken(usuario);
@@ -91,25 +94,26 @@ namespace condominio_API.Controllers
         {
             try
             {
-                if (novoUsuario == null)
-                {
+                    if (novoUsuario == null)
+                    {
                         return BadRequest(new { mensagem = "Por favor, preencha todos os campos" });
                     }
 
                     var moradorFirst = await _context.Usuarios.FirstOrDefaultAsync(user => user.Documento == novoUsuario.Documento
-                   || user.Email == novoUsuario.Email);
+                        || user.Email == novoUsuario.Email);
 
                     if (moradorFirst != null)
                     {
                         return BadRequest(new { mensagem = "Documento ou e-mail já cadastrado. Por favor, tente novamente." });
                     }
 
-                    if (((int)novoUsuario.NivelAcesso == 2 || (int)novoUsuario.NivelAcesso == 4) && novoUsuario.ApartamentoId <= 0)
+                    if ((novoUsuario.NivelAcesso == nivelAcessoEnum.Sindico || novoUsuario.NivelAcesso == nivelAcessoEnum.Morador)
+                        && (!novoUsuario.ApartamentoId.HasValue || novoUsuario.ApartamentoId <= 0))
                     {
                         return BadRequest(new { mensagem = "Síndicos e moradores devem ter um apartamento válido." });
                     }
 
-                    var usuarioRetornado = new  // usado pra retornar na tela os dados "required"(?)
+                var usuarioRetornado = new  // usado pra retornar na tela os dados "required"(?)
                     {
                         novoUsuario.UsuarioId,
                         novoUsuario.Nome,
@@ -211,7 +215,9 @@ namespace condominio_API.Controllers
             }
 
             // senha padrão do condominio
-            usuario.Senha = HashHelper.GerarHash("Condominio123");
+            string senhaHash = HashHelper.GerarHash("Condominio123");
+            usuario.Senha = senhaHash;
+
 
             _context.Entry(usuario).Property(u => u.Senha).IsModified = true;
             await _context.SaveChangesAsync();

@@ -26,7 +26,7 @@ namespace condominio_API.Models
 
 
         [Required]
-        [StringLength(50, MinimumLength = 6)]
+        [StringLength(255, MinimumLength = 6)]
         public required string Senha { get; set; }
 
 
