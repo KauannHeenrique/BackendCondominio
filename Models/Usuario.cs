@@ -31,7 +31,7 @@ namespace condominio_API.Models
 
 
         [Required]
-        public nivelAcessoEnum NivelAcesso { get; set; }
+        public NivelAcessoEnum NivelAcesso { get; set; }
 
 
         [Required]
@@ -53,9 +53,11 @@ namespace condominio_API.Models
         [Required]
         public bool Status { get; set; }
 
+        public bool IsTemporaryPassword { get; set; } // Adicionado
+
     }
 
-    public enum nivelAcessoEnum
+    public enum NivelAcessoEnum
     {
         Admin = 1,
         Sindico = 2,

@@ -778,6 +778,18 @@
         }
       }
     },
+    "/api/Usuario/perfil": {
+      "get": {
+        "tags": [
+          "Usuario"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Usuario/BuscarUsuarioPor": {
       "get": {
         "tags": [
@@ -1292,6 +1304,10 @@
         "additionalProperties": false
       },
       "AuthRequest": {
+        "required": [
+          "cpf",
+          "senha"
+        ],
         "type": "object",
         "properties": {
           "cpf": {
@@ -1330,6 +1346,16 @@
           }
         },
         "additionalProperties": false
+      },
+      "NivelAcessoEnum": {
+        "enum": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "format": "int32"
       },
       "QRCodeRequest": {
         "required": [
@@ -1447,7 +1473,7 @@
             "type": "string"
           },
           "nivelAcesso": {
-            "$ref": "#/components/schemas/nivelAcessoEnum"
+            "$ref": "#/components/schemas/NivelAcessoEnum"
           },
           "telefone": {
             "maxLength": 15,
@@ -1468,6 +1494,9 @@
             "type": "string"
           },
           "status": {
+            "type": "boolean"
+          },
+          "isTemporaryPassword": {
             "type": "boolean"
           }
         },
@@ -1514,16 +1543,6 @@
           }
         },
         "additionalProperties": false
-      },
-      "nivelAcessoEnum": {
-        "enum": [
-          1,
-          2,
-          3,
-          4
-        ],
-        "type": "integer",
-        "format": "int32"
       }
     }
   }

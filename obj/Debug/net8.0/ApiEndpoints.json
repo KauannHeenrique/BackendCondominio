@@ -588,6 +588,16 @@
   },
   {
     "ContainingType": "condominio_API.Controllers.UsuarioController",
+    "Method": "GetPerfil",
+    "RelativePath": "api/Usuario/perfil",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "condominio_API.Controllers.UsuarioController",
     "Method": "ResetarSenha",
     "RelativePath": "api/Usuario/ResetarSenha/{id}",
     "HttpMethod": "PUT",

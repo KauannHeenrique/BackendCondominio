@@ -7,17 +7,23 @@ using System.Collections.Generic;
 using System.Linq;
 using condominio_API.Services;
 using Condominio_API.Requests;
-using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authorization;
+
+
 namespace condominio_API.Controllers
+
 {
     [Route("api/[controller]")]
     [ApiController]
     public class UsuarioController : ControllerBase
     {
         private readonly AppDbContext _context;
-        public UsuarioController(AppDbContext context)
+        private readonly IEmailService _emailService; 
+        public UsuarioController(AppDbContext context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService; 
         }
 
         [HttpGet("ExibirTodosUsuarios")]
@@ -37,18 +43,32 @@ namespace condominio_API.Controllers
 
             if (usuario == null || !HashHelper.VerificarHash(usuario.Senha, request.Senha))
             {
-                return Unauthorized(new { mensagem = "Email ou senha inválidos." });
+                return Unauthorized(new { mensagem = "CPF ou senha inválidos." });
             }
 
-            Console.WriteLine($"Tentando login com CPF: {request.CPF}, Senha: {request.Senha}");
-
+            if (usuario.IsTemporaryPassword)
+            {
+                var token = new TokenService().GerarJwtToken(usuario);
+                return Ok(new
+                {
+                    mensagem = "Por favor, altere sua senha padrão.",
+                    redirectTo = "http://localhost:3000/recuperar-senha",
+                    token,
+                    usuario = new
+                    {
+                        usuario.UsuarioId,
+                        usuario.Nome,
+                        usuario.Documento,
+                        usuario.NivelAcesso
+                    }
+                });
+            }
 
             var newToken = new TokenService();
-
-            var token = newToken.GerarJwtToken(usuario);
+            var finalToken = newToken.GerarJwtToken(usuario);
             return Ok(new
             {
-                token,
+                token = finalToken,
                 usuario = new
                 {
                     usuario.UsuarioId,
@@ -58,6 +78,27 @@ namespace condominio_API.Controllers
                 }
             });
         }
+
+        [Authorize]
+        [HttpGet("perfil")]
+        public IActionResult GetPerfil()
+        {
+            var userId = User.FindFirst("id")?.Value;
+            var documento = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            var nivelAcesso = User.FindFirst("nivel_acesso")?.Value;
+
+            // Use essas informações para buscar dados no banco ou montar resposta
+
+            return Ok(new
+            {
+                UsuarioId = userId,
+                Documento = documento,
+                NivelAcesso = nivelAcesso,
+                // Outros dados do perfil
+            });
+        }
+
+
 
         [HttpGet("BuscarUsuarioPor")]
         public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuario([FromQuery] string? nomeUsuario, [FromQuery] string? documento, [FromQuery]  string? emailUsuario)
@@ -94,45 +135,49 @@ namespace condominio_API.Controllers
         {
             try
             {
-                    if (novoUsuario == null)
-                    {
-                        return BadRequest(new { mensagem = "Por favor, preencha todos os campos" });
-                    }
+                if (novoUsuario == null)
+                {
+                    return BadRequest(new { mensagem = "Por favor, preencha todos os campos" });
+                }
 
-                    var moradorFirst = await _context.Usuarios.FirstOrDefaultAsync(user => user.Documento == novoUsuario.Documento
-                        || user.Email == novoUsuario.Email);
+                var moradorFirst = await _context.Usuarios.FirstOrDefaultAsync(user => user.Documento == novoUsuario.Documento
+                    || user.Email == novoUsuario.Email);
 
-                    if (moradorFirst != null)
-                    {
-                        return BadRequest(new { mensagem = "Documento ou e-mail já cadastrado. Por favor, tente novamente." });
-                    }
+                if (moradorFirst != null)
+                {
+                    return BadRequest(new { mensagem = "Documento ou e-mail já cadastrado. Por favor, tente novamente." });
+                }
 
-                    if ((novoUsuario.NivelAcesso == nivelAcessoEnum.Sindico || novoUsuario.NivelAcesso == nivelAcessoEnum.Morador)
-                        && (!novoUsuario.ApartamentoId.HasValue || novoUsuario.ApartamentoId <= 0))
-                    {
-                        return BadRequest(new { mensagem = "Síndicos e moradores devem ter um apartamento válido." });
-                    }
+                if ((novoUsuario.NivelAcesso == NivelAcessoEnum.Sindico || novoUsuario.NivelAcesso == NivelAcessoEnum.Morador)
+                    && (!novoUsuario.ApartamentoId.HasValue || novoUsuario.ApartamentoId <= 0))
+                {
+                    return BadRequest(new { mensagem = "Síndicos e moradores devem ter um apartamento válido." });
+                }
 
-                var usuarioRetornado = new  // usado pra retornar na tela os dados "required"(?)
-                    {
-                        novoUsuario.UsuarioId,
-                        novoUsuario.Nome,
-                        novoUsuario.Email,
-                        novoUsuario.NivelAcesso,
-                        novoUsuario.ApartamentoId
-                    };
-
+                // Definir senha padrão e marcar como temporária
                 novoUsuario.Senha = HashHelper.GerarHash("Condominio123");
+                novoUsuario.IsTemporaryPassword = true;
 
                 _context.Usuarios.Add(novoUsuario);
                 await _context.SaveChangesAsync();
 
-                return Ok(new { mensagem = "Usuário cadastrado com sucesso!", usuarioRetornado });
-                }
+                // Enviar e-mail com a senha padrão
+                await _emailService.SendWelcomeEmailAsync(novoUsuario.Email, "Condominio123");
+                    
+                var usuarioRetornado = new
+                {
+                    novoUsuario.UsuarioId,
+                    novoUsuario.Nome,
+                    novoUsuario.Email,
+                    novoUsuario.NivelAcesso,
+                    novoUsuario.ApartamentoId
+                };
 
+                return Ok(new { mensagem = "Usuário cadastrado com sucesso! Um e-mail com a senha foi enviado.", usuarioRetornado });
+            }
             catch (Exception ex)
             {
-                return StatusCode(500, new { mensagem = "Erro ao cadastrar usuário!", detalhes = ex.Message });
+                return StatusCode(500, new { mensagem = "Erro ao cadastrar usuário ou enviar e-mail.", detalhes = ex.Message });
             }
         }
 

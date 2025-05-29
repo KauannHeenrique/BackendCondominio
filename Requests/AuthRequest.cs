@@ -2,7 +2,7 @@
 {
     public class AuthRequest
     {
-        public string CPF { get; set; }
-        public string Senha { get; set; }
+        public required string CPF { get; set; }
+        public required string Senha { get; set; }
     }
 }
