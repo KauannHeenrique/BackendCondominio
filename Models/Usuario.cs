@@ -10,51 +10,45 @@ namespace condominio_API.Models
         public int UsuarioId { get; set; }
 
         [Required]
-        [StringLength(100, MinimumLength = 2)]  // stringlength conta quantos carcteres tem na variavel para validar ela (maximo, minimo)
+        [StringLength(100, MinimumLength = 2)]
         public required string Nome { get; set; }
-
 
         [Required]
         [StringLength(14, MinimumLength = 8)]
         public required string Documento { get; set; }
-
 
         [Required]
         [EmailAddress]
         [StringLength(100)]
         public required string Email { get; set; }
 
-
         [Required]
-        [StringLength(255, MinimumLength = 6)]
+        [StringLength(255)]
         public required string Senha { get; set; }
-
 
         [Required]
         public NivelAcessoEnum NivelAcesso { get; set; }
-
 
         [Required]
         [StringLength(15)]
         public string? Telefone { get; set; }
 
-
-        public int? ApartamentoId { get; set; }  // apartamento vai ser opcional pelos acessos de funcionario e adm (nao moradores)
+        public int? ApartamentoId { get; set; }
 
         [ForeignKey("ApartamentoId")]
         public Apartamento? Apartamento { get; set; }
-
 
         [Required]
         [StringLength(50)]
         public required string CodigoRFID { get; set; }
 
-
         [Required]
         public bool Status { get; set; }
 
-        public bool IsTemporaryPassword { get; set; } // Adicionado
+        public bool IsTemporaryPassword { get; set; }
 
+        [Required]
+        public DateTime DataCadastro { get; set; } = DateTime.UtcNow;
     }
 
     public enum NivelAcessoEnum

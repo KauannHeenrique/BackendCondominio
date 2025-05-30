@@ -1,4 +1,4 @@
-using condominio_API.Data;
+﻿using condominio_API.Data;
 using condominio_API.Services;
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
@@ -16,16 +16,18 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
     ));
 
-// Registrar configura��es de e-mail
+// Registrar configurações de e-mail
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
-// Registrar o servi�o de e-mail
+// Registrar o serviço de e-mail
 builder.Services.AddSingleton<IEmailService, EmailService>();
 
-// Adicionar servi�os
+// Adicionar serviços
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// ✅ AUTENTICAÇÃO COM JWT EM COOKIE
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -33,7 +35,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
@@ -43,9 +45,23 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = "condominio_backend.com",
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("PvvCX14bFPJKfA6dZib1DitiRnuhgS7uoAZw3AgIYS4="))
     };
+
+    // 🔐 Capturar o JWT do cookie "jwt"
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var token = context.HttpContext.Request.Cookies["jwt"];
+            if (!string.IsNullOrEmpty(token))
+            {
+                context.Token = token;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
-// Configurar CORS
+// ✅ CONFIGURAÇÃO DE CORS PARA COOKIES
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowNextJs", builder =>
@@ -55,15 +71,17 @@ builder.Services.AddCors(options =>
             "http://localhost:3000",
             "http://192.168.19.85:3000",
             "http://192.168.113.85:3000",
-            "http://192.168.19.85:3001")
-               .AllowAnyMethod()
-               .AllowAnyHeader();
+            "http://172.20.10.2:3000"
+        )
+        .AllowCredentials() // <- ESSENCIAL para cookies funcionarem!
+        .AllowAnyMethod()
+        .AllowAnyHeader();
     });
 });
 
 var app = builder.Build();
 
-// Configurar o pipeline de requisi��es
+// Pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

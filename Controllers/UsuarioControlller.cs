@@ -46,55 +46,55 @@ namespace condominio_API.Controllers
                 return Unauthorized(new { mensagem = "CPF ou senha inválidos." });
             }
 
+            var token = new TokenService().GerarJwtToken(usuario);
+
+            // Adicionar o token ao cookie HttpOnly
+            Response.Cookies.Append("jwt", token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false, // use true apenas com HTTPS
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddHours(1)
+            });
+
             if (usuario.IsTemporaryPassword)
             {
-                var token = new TokenService().GerarJwtToken(usuario);
                 return Ok(new
                 {
                     mensagem = "Por favor, altere sua senha padrão.",
-                    redirectTo = "http://localhost:3000/recuperar-senha",
-                    token,
-                    usuario = new
-                    {
-                        usuario.UsuarioId,
-                        usuario.Nome,
-                        usuario.Documento,
-                        usuario.NivelAcesso
-                    }
+                    redirectTo = "http://172.20.10.2:3000/recuperar-senha"
                 });
             }
 
-            var newToken = new TokenService();
-            var finalToken = newToken.GerarJwtToken(usuario);
-            return Ok(new
-            {
-                token = finalToken,
-                usuario = new
-                {
-                    usuario.UsuarioId,
-                    usuario.Nome,
-                    usuario.Documento,
-                    usuario.NivelAcesso
-                }
-            });
+            return Ok(new { mensagem = "Login realizado com sucesso." });
         }
+
 
         [Authorize]
         [HttpGet("perfil")]
-        public IActionResult GetPerfil()
+        public async Task<IActionResult> GetPerfil()
         {
             var userId = User.FindFirst("id")?.Value;
-            var documento = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-            var nivelAcesso = User.FindFirst("nivel_acesso")?.Value;
 
-            // Use essas informações para buscar dados no banco ou montar resposta
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var usuario = await _context.Usuarios
+                .Include(u => u.Apartamento)
+                .FirstOrDefaultAsync(u => u.UsuarioId == int.Parse(userId));
+
+            if (usuario == null) return NotFound();
 
             return Ok(new
             {
-                UsuarioId = userId,
-                Documento = documento,
-                NivelAcesso = nivelAcesso,
-                // Outros dados do perfil
+                usuario.UsuarioId,
+                usuario.Documento,
+                usuario.NivelAcesso,
+                usuario.Nome,
+                usuario.Email,
+                usuario.Telefone,
+                Bloco = usuario.Apartamento?.Bloco,
+                Apartamento = usuario.Apartamento?.Numero,
+                usuario.DataCadastro
             });
         }
 
@@ -170,7 +170,8 @@ namespace condominio_API.Controllers
                     novoUsuario.Nome,
                     novoUsuario.Email,
                     novoUsuario.NivelAcesso,
-                    novoUsuario.ApartamentoId
+                    novoUsuario.ApartamentoId,
+                    novoUsuario.DataCadastro
                 };
 
                 return Ok(new { mensagem = "Usuário cadastrado com sucesso! Um e-mail com a senha foi enviado.", usuarioRetornado });
@@ -260,6 +261,44 @@ namespace condominio_API.Controllers
             }
 
             return Ok(new { authorized = true });
+        }
+
+        [Authorize]
+        [HttpPut("AlterarSenha")]
+        public async Task<IActionResult> AlterarSenha([FromBody] AlterarSenhaRequest request)
+        {
+            if (string.IsNullOrEmpty(request.SenhaAtual) || string.IsNullOrEmpty(request.NovaSenha))
+            {
+                return BadRequest(new { mensagem = "Preencha todos os campos." });
+            }
+
+            var userId = User.FindFirst("id")?.Value;
+
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var usuario = await _context.Usuarios.FindAsync(int.Parse(userId));
+
+            if (usuario == null)
+            {
+                return NotFound(new { mensagem = "Usuário não encontrado." });
+            }
+
+            // Verificar se a senha atual está correta
+            if (!HashHelper.VerificarHash(usuario.Senha, request.SenhaAtual))
+            {
+                return BadRequest(new { mensagem = "Senha atual incorreta." });
+            }
+
+            // Atualizar a senha
+            usuario.Senha = HashHelper.GerarHash(request.NovaSenha);
+            usuario.IsTemporaryPassword = false;
+
+            _context.Entry(usuario).Property(u => u.Senha).IsModified = true;
+            _context.Entry(usuario).Property(u => u.IsTemporaryPassword).IsModified = true;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { mensagem = "Senha alterada com sucesso." });
         }
 
 

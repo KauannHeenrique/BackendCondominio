@@ -32,7 +32,7 @@ namespace condominio_API.Services
                     <h1 style='color: #26c9a8;'>Bem-vindo ao sistema!</h1>
                     <p>Sua conta foi criada com sucesso. Sua senha padrão é: <strong>{senhaPadrao}</strong></p>
                     <p>Por motivos de segurança, recomendamos que você altere sua senha no primeiro acesso.</p>
-                    <p><a href='http://localhost:3000/recuperar-senha' style='color: #26c9a8;'>Clique aqui para alterar sua senha</a></p>
+                    <p><a href='http://172.20.10.2:3000/changePassword' style='color: #26c9a8;'>Clique aqui para alterar sua senha</a></p>
                     <p>Se você não solicitou esta conta, entre em contato com o suporte.</p>"
             };
             message.Body = bodyBuilder.ToMessageBody();

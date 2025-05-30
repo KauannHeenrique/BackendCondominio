@@ -463,6 +463,22 @@
   },
   {
     "ContainingType": "condominio_API.Controllers.UsuarioController",
+    "Method": "AlterarSenha",
+    "RelativePath": "api/Usuario/AlterarSenha",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "Condominio_API.Requests.AlterarSenhaRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "condominio_API.Controllers.UsuarioController",
     "Method": "PutUsuario",
     "RelativePath": "api/Usuario/AtualizarUsuario/{id}",
     "HttpMethod": "PUT",
