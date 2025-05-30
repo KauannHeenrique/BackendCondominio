@@ -19,11 +19,13 @@ namespace condominio_API.Controllers
     public class UsuarioController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private readonly IEmailService _emailService; 
-        public UsuarioController(AppDbContext context, IEmailService emailService)
+        private readonly IEmailService _emailService;
+        private readonly IResetPasswordEmailService _resetPasswordEmailService;
+        public UsuarioController(AppDbContext context, IEmailService emailService, IResetPasswordEmailService resetPasswordEmailService)
         {
             _context = context;
-            _emailService = emailService; 
+            _emailService = emailService;
+            _resetPasswordEmailService = resetPasswordEmailService;
         }
 
         [HttpGet("ExibirTodosUsuarios")]
@@ -61,8 +63,8 @@ namespace condominio_API.Controllers
             {
                 return Ok(new
                 {
-                    mensagem = "Por favor, altere sua senha padrão.",
-                    redirectTo = "http://172.20.10.2:3000/recuperar-senha"
+                    mensagem = "Por favor, altere sua senha.",
+                    redirectTo = "http://172.20.10.2:3000/changePassword"
                 });
             }
 
@@ -101,9 +103,20 @@ namespace condominio_API.Controllers
 
 
         [HttpGet("BuscarUsuarioPor")]
-        public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuario([FromQuery] string? nomeUsuario, [FromQuery] string? documento, [FromQuery]  string? emailUsuario)
+        public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuario(
+            [FromQuery] int? id,
+            [FromQuery] string? nomeUsuario,
+            [FromQuery] string? documento,
+            [FromQuery] string? emailUsuario)
         {
-            var query = _context.Usuarios.AsQueryable();
+            var query = _context.Usuarios
+                .Include(u => u.Apartamento) 
+                .AsQueryable();
+
+            if (id.HasValue)
+            {
+                query = query.Where(user => user.UsuarioId == id.Value);
+            }
 
             if (!string.IsNullOrWhiteSpace(nomeUsuario))
             {
@@ -129,6 +142,7 @@ namespace condominio_API.Controllers
 
             return Ok(usuarios);
         }
+
 
         [HttpPost("AdicionarUsuario")]
         public async Task<ActionResult<Usuario>> PostUsuario(Usuario novoUsuario)
@@ -317,16 +331,27 @@ namespace condominio_API.Controllers
                 return NotFound("Usuário não encontrado.");
             }
 
-            // senha padrão do condominio
+            // Definir senha padrão do condomínio
             string senhaHash = HashHelper.GerarHash("Condominio123");
             usuario.Senha = senhaHash;
 
+            // Definir como senha temporária
+            usuario.IsTemporaryPassword = true;
 
+            // Marcar a senha como modificada
             _context.Entry(usuario).Property(u => u.Senha).IsModified = true;
+            _context.Entry(usuario).Property(u => u.IsTemporaryPassword).IsModified = true;
+
+            // Enviar e-mail informando o usuário da senha resetada
+            await _resetPasswordEmailService.SendResetPasswordEmailAsync(usuario.Email, "Condominio123");
+
+            // Salvar as mudanças no banco de dados
             await _context.SaveChangesAsync();
 
-            return Ok("Senha resetada com sucesso.");
+            return Ok("Senha resetada com sucesso. Um e-mail foi enviado com a senha temporária.");
         }
+
+
 
 
 

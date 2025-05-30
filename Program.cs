@@ -21,6 +21,8 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Emai
 
 // Registrar o serviço de e-mail
 builder.Services.AddSingleton<IEmailService, EmailService>();
+builder.Services.AddSingleton<IResetPasswordEmailService, ResetPasswordEmailService>();
+
 
 // Adicionar serviços
 builder.Services.AddControllers();

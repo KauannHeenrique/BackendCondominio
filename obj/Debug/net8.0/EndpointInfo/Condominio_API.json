@@ -797,6 +797,14 @@
         ],
         "parameters": [
           {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
             "name": "nomeUsuario",
             "in": "query",
             "schema": {
@@ -1323,7 +1331,8 @@
         "required": [
           "bloco",
           "numero",
-          "proprietario"
+          "proprietario",
+          "situacao"
         ],
         "type": "object",
         "properties": {
@@ -1344,6 +1353,13 @@
           "proprietario": {
             "minLength": 1,
             "type": "string"
+          },
+          "situacao": {
+            "$ref": "#/components/schemas/SituacaoApartamento"
+          },
+          "observacoes": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -1478,6 +1494,15 @@
           }
         },
         "additionalProperties": false
+      },
+      "SituacaoApartamento": {
+        "enum": [
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
       },
       "Usuario": {
         "required": [

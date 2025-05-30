@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Collections.Generic;
 
 namespace condominio_API.Models
 {
@@ -19,5 +18,17 @@ namespace condominio_API.Models
 
         [Required]
         public required string Proprietario { get; set; }
+
+        [Required]
+        public SituacaoApartamento Situacao { get; set; } 
+
+        public string? Observacoes { get; set; }
     }
+    public enum SituacaoApartamento
+    {
+        Disponivel = 1,
+        Ocupado = 2,
+        EmManutencao = 3
+    }
+
 }

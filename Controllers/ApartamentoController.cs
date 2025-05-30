@@ -64,10 +64,9 @@ namespace condominio_API.Controllers
             return Ok(apartamento);
         }
 
-        [HttpPost("CadastrarApartamento")] 
+        [HttpPost("CadastrarApartamento")]
         public async Task<ActionResult<Apartamento>> PostApartamento(Apartamento novoApartamento)
         {
-
             try
             {
                 if (novoApartamento == null)
@@ -81,6 +80,12 @@ namespace condominio_API.Controllers
                 if (apartamentoFirst != null)
                 {
                     return BadRequest(new { mensagem = "Este apartamento já está cadastrado!" });
+                }
+
+                // Verificar se a situação do apartamento é válida
+                if (!Enum.IsDefined(typeof(SituacaoApartamento), novoApartamento.Situacao))
+                {
+                    return BadRequest(new { mensagem = "Situação do apartamento inválida." });
                 }
 
                 _context.Apartamentos.Add(novoApartamento);
@@ -109,22 +114,32 @@ namespace condominio_API.Controllers
                 return NotFound();
             }
 
-            if (!string.IsNullOrEmpty(apartamento.Bloco) && apartamento.Bloco != "string" && apartamentoTemp.Bloco != apartamento.Bloco)
+            // Atualizando o Bloco
+            if (!string.IsNullOrEmpty(apartamento.Bloco) && apartamento.Bloco != apartamentoTemp.Bloco)
             {
                 apartamentoTemp.Bloco = apartamento.Bloco;
                 _context.Entry(apartamentoTemp).Property(a => a.Bloco).IsModified = true;
             }
 
-            if (apartamento.Numero > 0 && apartamentoTemp.Numero != apartamento.Numero)
+            // Atualizando o Número
+            if (apartamento.Numero > 0 && apartamento.Numero != apartamentoTemp.Numero)
             {
                 apartamentoTemp.Numero = apartamento.Numero;
                 _context.Entry(apartamentoTemp).Property(a => a.Numero).IsModified = true;
             }
 
-            if (!string.IsNullOrEmpty(apartamento.Proprietario) && apartamento.Proprietario != "string" && apartamentoTemp.Proprietario != apartamento.Proprietario)
+            // Atualizando o Proprietário
+            if (!string.IsNullOrEmpty(apartamento.Proprietario) && apartamento.Proprietario != apartamentoTemp.Proprietario)
             {
                 apartamentoTemp.Proprietario = apartamento.Proprietario;
                 _context.Entry(apartamentoTemp).Property(a => a.Proprietario).IsModified = true;
+            }
+
+            // Atualizando a Situação
+            if (apartamento.Situacao != apartamentoTemp.Situacao)
+            {
+                apartamentoTemp.Situacao = apartamento.Situacao;
+                _context.Entry(apartamentoTemp).Property(a => a.Situacao).IsModified = true;
             }
 
             await _context.SaveChangesAsync();
