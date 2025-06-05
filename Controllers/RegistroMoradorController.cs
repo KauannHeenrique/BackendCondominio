@@ -27,11 +27,11 @@ namespace condominio_API.Controllers
             {
                 if (entradaMoradorReq == null || string.IsNullOrEmpty(entradaMoradorReq.CodigoRFID))
                 {
-                    return BadRequest(new { mensagem = "O codigo RFID é obrigatório!" });
+                    return BadRequest(new { mensagem = "O código RFID é obrigatório!" });
                 }
 
                 var usuario = await _context.Usuarios!
-                    .Include(u => u.Apartamento) 
+                    .Include(u => u.Apartamento)
                     .FirstOrDefaultAsync(u => u.CodigoRFID == entradaMoradorReq.CodigoRFID);
 
                 if (usuario == null)
@@ -42,7 +42,8 @@ namespace condominio_API.Controllers
                 var novaEntrada = new AcessoEntradaMorador
                 {
                     UsuarioId = usuario.UsuarioId,
-                    DataHoraEntrada = DateTime.Now
+                    DataHoraEntrada = DateTime.Now,
+                    EntradaPor = entradaMoradorReq.EntradaPor ?? "1"
                 };
 
                 _context.AcessoEntradaMoradores!.Add(novaEntrada);
@@ -55,11 +56,13 @@ namespace condominio_API.Controllers
                     {
                         novaEntrada.Id,
                         novaEntrada.UsuarioId,
-                        UsuarioNome = usuario.Nome,
-                        usuario.ApartamentoId,
-                        ApartamentoNumero = usuario.Apartamento?.Numero, 
+                        nome = usuario.Nome,
+                        documento = usuario.Documento,
+                        nivelAcesso = usuario.NivelAcesso.ToString(),
+                        apartamentoId = usuario.ApartamentoId,
+                        apartamento = usuario.Apartamento?.Numero,
                         bloco = usuario.Apartamento?.Bloco,
-                        novaEntrada.DataHoraEntrada
+                        dataHoraEntrada = novaEntrada.DataHoraEntrada
                     }
                 });
             }
@@ -69,28 +72,32 @@ namespace condominio_API.Controllers
             }
         }
 
-        [HttpGet("ListarEntradas")]
+        [HttpGet("ListarEntradasMorador")]
         public async Task<ActionResult> ListarEntradas()
         {
             try
             {
                 var entradas = await _context.AcessoEntradaMoradores!
                     .Include(e => e.Usuario)
-                        .ThenInclude(u => u.Apartamento) 
+                        .ThenInclude(u => u.Apartamento)
                     .OrderByDescending(e => e.DataHoraEntrada)
-                    .Select(e => new
-                    {
-                        e.Id,
-                        e.UsuarioId,
-                        Nome = e.Usuario!.Nome,
-                        e.Usuario!.ApartamentoId,
-                        Apartamento = e.Usuario!.Apartamento!.Numero,
-                        bloco = e.Usuario!.Apartamento!.Bloco,
-                        e.DataHoraEntrada
-                    })
-                    .ToListAsync();
+                    .ToListAsync(); 
 
-                return Ok(entradas);
+                var resultado = entradas.Select(e => new
+                {
+                    e.Id,
+                    e.UsuarioId,
+                    nome = e.Usuario?.Nome,
+                    documento = e.Usuario?.Documento,
+                    nivelAcesso = e.Usuario?.NivelAcesso.ToString(),
+                    apartamentoId = e.Usuario?.ApartamentoId,
+                    apartamento = e.Usuario?.Apartamento?.Numero,
+                    bloco = e.Usuario?.Apartamento?.Bloco,
+                    dataHoraEntrada = e.DataHoraEntrada,
+                    entradaPor = e.EntradaPor
+                });
+
+                return Ok(resultado);
             }
             catch (Exception ex)
             {
@@ -98,13 +105,20 @@ namespace condominio_API.Controllers
             }
         }
 
+
         [HttpGet("FiltrarEntradasAdmin")]
-        public async Task<ActionResult> FiltrarEntradasAdmin ([FromQuery] string? documento = null, [FromQuery] int? apartamentoId = null,
-            [FromQuery] string? bloco = null, [FromQuery] DateTime? dataInicio = null, [FromQuery] DateTime? dataFim = null)
+        public async Task<ActionResult> FiltrarEntradasAdmin(
+    [FromQuery] string? documento = null,
+    [FromQuery] int? numero = null,
+    [FromQuery] string? bloco = null,
+    [FromQuery] string? nivelAcesso = null,
+    [FromQuery] DateTime? dataInicio = null,
+    [FromQuery] DateTime? dataFim = null)
         {
             try
             {
-                if (string.IsNullOrEmpty(documento) && !apartamentoId.HasValue && string.IsNullOrEmpty(bloco) && !dataInicio.HasValue && !dataFim.HasValue)
+                if (string.IsNullOrEmpty(documento) && !numero.HasValue && string.IsNullOrEmpty(bloco)
+                    && string.IsNullOrEmpty(nivelAcesso) && !dataInicio.HasValue && !dataFim.HasValue)
                 {
                     return BadRequest(new { mensagem = "Informe pelo menos um filtro!" });
                 }
@@ -119,34 +133,61 @@ namespace condominio_API.Controllers
                     query = query.Where(e => e.Usuario!.Documento == documento);
                 }
 
-                if (apartamentoId.HasValue)
+                if (!string.IsNullOrEmpty(nivelAcesso))
                 {
-                    query = query.Where(e => e.Usuario!.ApartamentoId == apartamentoId.Value); 
+                    if (Enum.TryParse<NivelAcessoEnum>(nivelAcesso, ignoreCase: true, out var nivelEnum))
+                    {
+                        query = query.Where(e => e.Usuario!.NivelAcesso == nivelEnum);
+                    }
+                    else
+                    {
+                        return BadRequest(new { mensagem = $"Nível de acesso inválido: {nivelAcesso}" });
+                    }
                 }
 
-                if (dataInicio.HasValue)
+                if (numero.HasValue)
                 {
-                    query = query.Where(e => e.DataHoraEntrada >= dataInicio.Value);
+                    query = query.Where(e => e.Usuario!.Apartamento != null && e.Usuario.Apartamento.Numero == numero.Value);
                 }
 
-                if (dataFim.HasValue)
+                if (!string.IsNullOrEmpty(bloco))
                 {
-                    query = query.Where(e => e.DataHoraEntrada <= dataFim.Value);
+                    query = query.Where(e => e.Usuario!.Apartamento != null && e.Usuario.Apartamento.Bloco == bloco);
+                }
+
+                // 💡 Filtragem por data flexível
+                if (dataInicio.HasValue && dataFim.HasValue)
+                {
+                    var inicio = dataInicio.Value.Date;
+                    var fim = dataFim.Value.Date.AddDays(1).AddTicks(-1);
+                    query = query.Where(e => e.DataHoraEntrada >= inicio && e.DataHoraEntrada <= fim);
+                }
+                else if (dataInicio.HasValue)
+                {
+                    var inicio = dataInicio.Value.Date;
+                    query = query.Where(e => e.DataHoraEntrada >= inicio);
+                }
+                else if (dataFim.HasValue)
+                {
+                    var fim = dataFim.Value.Date.AddDays(1).AddTicks(-1);
+                    query = query.Where(e => e.DataHoraEntrada <= fim);
                 }
 
                 var entradas = await query
-                    .OrderByDescending(e => e.DataHoraEntrada)
-                    .Select(e => new
-                    {
-                        e.Id,
-                        e.UsuarioId,
-                        Nome = e.Usuario!.Nome,
-                        e.Usuario!.ApartamentoId,
-                        Apartamento = e.Usuario!.Apartamento!.Numero,
-                        bloco = e.Usuario!.Apartamento!.Bloco,
-                        e.DataHoraEntrada
-                    })
-                    .ToListAsync();
+    .OrderByDescending(e => e.DataHoraEntrada)
+    .Select(e => new
+    {
+        e.Id,
+        e.UsuarioId,
+        Nome = e.Usuario!.Nome,
+        e.Usuario!.ApartamentoId,
+        Apartamento = e.Usuario!.Apartamento != null ? (int?)e.Usuario.Apartamento.Numero : null,
+        Bloco = e.Usuario!.Apartamento != null ? e.Usuario.Apartamento.Bloco : null,
+        NivelAcesso = e.Usuario!.NivelAcesso.ToString(),
+        e.DataHoraEntrada,
+        entradaPor = e.EntradaPor
+    })
+    .ToListAsync();
 
                 if (entradas.Count == 0)
                 {
@@ -193,7 +234,8 @@ namespace condominio_API.Controllers
                         idApartamento = e.Usuario!.ApartamentoId,
                         apartamento = e.Usuario!.Apartamento!.Numero,
                         bloco = e.Usuario!.Apartamento!.Bloco,
-                        dataEntrada = e.DataHoraEntrada
+                        dataEntrada = e.DataHoraEntrada,
+                        entradaPor = e.EntradaPor
                     })
                     .ToListAsync();
 

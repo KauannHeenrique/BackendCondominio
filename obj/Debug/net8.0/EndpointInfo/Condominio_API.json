@@ -53,7 +53,7 @@
         }
       }
     },
-    "/api/AcessoEntradaMorador/ListarEntradas": {
+    "/api/AcessoEntradaMorador/ListarEntradasMorador": {
       "get": {
         "tags": [
           "AcessoEntradaMorador"
@@ -79,7 +79,7 @@
             }
           },
           {
-            "name": "apartamentoId",
+            "name": "numero",
             "in": "query",
             "schema": {
               "type": "integer",
@@ -88,6 +88,13 @@
           },
           {
             "name": "bloco",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "nivelAcesso",
             "in": "query",
             "schema": {
               "type": "string"
@@ -927,17 +934,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Usuario"
+                "$ref": "#/components/schemas/AtualizarUsuarioRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/Usuario"
+                "$ref": "#/components/schemas/AtualizarUsuarioRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/Usuario"
+                "$ref": "#/components/schemas/AtualizarUsuarioRequest"
               }
             }
           }
@@ -1258,6 +1265,7 @@
       "AcessoEntradaMorador": {
         "required": [
           "dataHoraEntrada",
+          "entradaPor",
           "usuarioId"
         ],
         "type": "object",
@@ -1276,6 +1284,10 @@
           "dataHoraEntrada": {
             "type": "string",
             "format": "date-time"
+          },
+          "entradaPor": {
+            "minLength": 1,
+            "type": "string"
           }
         },
         "additionalProperties": false
@@ -1364,6 +1376,40 @@
         },
         "additionalProperties": false
       },
+      "AtualizarUsuarioRequest": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "nullable": true
+          },
+          "documento": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "telefone": {
+            "type": "string",
+            "nullable": true
+          },
+          "apartamentoId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "codigoRFID": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
       "AuthRequest": {
         "required": [
           "cpf",
@@ -1391,6 +1437,10 @@
           "codigoRFID": {
             "minLength": 1,
             "type": "string"
+          },
+          "entradaPor": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false

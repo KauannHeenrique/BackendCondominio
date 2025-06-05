@@ -13,12 +13,17 @@
         "IsRequired": false
       },
       {
-        "Name": "apartamentoId",
+        "Name": "numero",
         "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "IsRequired": false
       },
       {
         "Name": "bloco",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "nivelAcesso",
         "Type": "System.String",
         "IsRequired": false
       },
@@ -54,7 +59,7 @@
   {
     "ContainingType": "condominio_API.Controllers.AcessoEntradaMoradorController",
     "Method": "ListarEntradas",
-    "RelativePath": "api/AcessoEntradaMorador/ListarEntradas",
+    "RelativePath": "api/AcessoEntradaMorador/ListarEntradasMorador",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -492,7 +497,7 @@
       },
       {
         "Name": "usuario",
-        "Type": "condominio_API.Models.Usuario",
+        "Type": "AtualizarUsuarioRequest",
         "IsRequired": true
       }
     ],

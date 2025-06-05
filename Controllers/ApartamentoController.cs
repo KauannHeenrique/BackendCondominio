@@ -104,48 +104,37 @@ namespace condominio_API.Controllers
         {
             if (id <= 0)
             {
-                return BadRequest("Apartamento inválido.");
+                return BadRequest(new { mensagem = "Apartamento inválido." });
             }
 
             var apartamentoTemp = await _context.Apartamentos.FindAsync(id);
 
             if (apartamentoTemp == null)
             {
-                return NotFound();
+                return NotFound(new { mensagem = "Apartamento não encontrado." });
             }
 
-            // Atualizando o Bloco
-            if (!string.IsNullOrEmpty(apartamento.Bloco) && apartamento.Bloco != apartamentoTemp.Bloco)
+            // Verifica duplicidade: mesmo bloco e número, mas com ID diferente
+            var duplicado = await _context.Apartamentos
+                .AnyAsync(a => a.Id != id && a.Bloco == apartamento.Bloco && a.Numero == apartamento.Numero);
+
+            if (duplicado)
             {
-                apartamentoTemp.Bloco = apartamento.Bloco;
-                _context.Entry(apartamentoTemp).Property(a => a.Bloco).IsModified = true;
+                return BadRequest(new { mensagem = "Já existe um apartamento com esse bloco e número." });
             }
 
-            // Atualizando o Número
-            if (apartamento.Numero > 0 && apartamento.Numero != apartamentoTemp.Numero)
-            {
-                apartamentoTemp.Numero = apartamento.Numero;
-                _context.Entry(apartamentoTemp).Property(a => a.Numero).IsModified = true;
-            }
-
-            // Atualizando o Proprietário
-            if (!string.IsNullOrEmpty(apartamento.Proprietario) && apartamento.Proprietario != apartamentoTemp.Proprietario)
-            {
-                apartamentoTemp.Proprietario = apartamento.Proprietario;
-                _context.Entry(apartamentoTemp).Property(a => a.Proprietario).IsModified = true;
-            }
-
-            // Atualizando a Situação
-            if (apartamento.Situacao != apartamentoTemp.Situacao)
-            {
-                apartamentoTemp.Situacao = apartamento.Situacao;
-                _context.Entry(apartamentoTemp).Property(a => a.Situacao).IsModified = true;
-            }
+            // Atualiza os campos
+            apartamentoTemp.Bloco = apartamento.Bloco;
+            apartamentoTemp.Numero = apartamento.Numero;
+            apartamentoTemp.Proprietario = apartamento.Proprietario;
+            apartamentoTemp.Situacao = apartamento.Situacao;
+            apartamentoTemp.Observacoes = apartamento.Observacoes;
 
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(new { mensagem = "Apartamento atualizado com sucesso!" });
         }
+
 
         [HttpDelete("ExcluirApartamento/{id}")]
         public async Task<IActionResult> DeletarApartamento(int id)

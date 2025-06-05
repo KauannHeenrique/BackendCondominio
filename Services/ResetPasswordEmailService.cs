@@ -9,22 +9,21 @@ namespace condominio_API.Services
     {
         private readonly EmailSettings _emailSettings;
 
-        // Construtor que recebe a configuração do e-mail via injeção de dependência
         public ResetPasswordEmailService(IOptions<EmailSettings> emailSettings)
         {
             _emailSettings = emailSettings.Value;
         }
 
-        // Método que envia o e-mail de reset de senha
+        // metodo que vai enviar o email de resetar de senha
         public async Task SendResetPasswordEmailAsync(string toEmail, string senhaPadrao)
         {
-            // Criação da mensagem de e-mail
+            // mensagem de e-mail 
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(_emailSettings.SenderName, _emailSettings.SenderEmail));
             message.To.Add(new MailboxAddress("", toEmail));
             message.Subject = "Alteração de senha bem-sucedida!";
 
-            // Corpo do e-mail em HTML
+            // e-mail em HTML
             var bodyBuilder = new BodyBuilder
             {
                 HtmlBody = $@"
@@ -37,7 +36,6 @@ namespace condominio_API.Services
             };
             message.Body = bodyBuilder.ToMessageBody();
 
-            // Envio do e-mail utilizando MailKit
             using var client = new SmtpClient();
             await client.ConnectAsync(_emailSettings.SmtpServer, _emailSettings.Port, MailKit.Security.SecureSocketOptions.StartTls);
             await client.AuthenticateAsync(_emailSettings.Username, _emailSettings.Password);

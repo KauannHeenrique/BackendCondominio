@@ -17,5 +17,8 @@
 
             [Required]
             public DateTime DataHoraEntrada { get; set; }
+
+            [Required]
+            public string EntradaPor { get; set; } = "1"; 
         }
     }

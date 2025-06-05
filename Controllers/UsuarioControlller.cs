@@ -197,7 +197,7 @@ namespace condominio_API.Controllers
         }
 
         [HttpPut("AtualizarUsuario/{id}")]
-        public async Task<IActionResult> PutUsuario(int id, [FromBody] Usuario usuario)
+        public async Task<IActionResult> PutUsuario(int id, [FromBody] AtualizarUsuarioRequest usuario)
         {
             if (id <= 0)
             {
@@ -255,7 +255,7 @@ namespace condominio_API.Controllers
 
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(new { mensagem = "Usuário atualizado com sucesso." });
         }
 
         [HttpGet("BuscarPorRFID")]  // rota usada para verificar se a tag esta cadastrada
