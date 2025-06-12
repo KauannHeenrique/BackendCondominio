@@ -49,6 +49,10 @@ namespace condominio_API.Models
 
         [Required]
         public DateTime DataCadastro { get; set; } = DateTime.UtcNow;
+
+        [StringLength(255)]
+        public string? FotoUrl { get; set; }
+
     }
 
     public enum NivelAcessoEnum

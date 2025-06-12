@@ -2,140 +2,107 @@
 using condominio_API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace condominio_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class VisitanteController : ControllerBase
+    public class NotificacaoController : ControllerBase
     {
         private readonly AppDbContext _context;
 
-        public VisitanteController(AppDbContext context)
+        public NotificacaoController(AppDbContext context)
         {
             _context = context;
         }
 
-        [HttpGet("ExibirTodosVisitantes")]
-        public async Task<ActionResult<IEnumerable<Visitante>>> GetTodosVisitantes()
+        // 1. Criar notificação
+        [HttpPost("CriarNotificacao")]
+        public async Task<IActionResult> CriarNotificacao([FromBody] Notificacao nova)
         {
-            return await _context.Visitantes.ToListAsync();
+            if (nova == null || string.IsNullOrWhiteSpace(nova.Mensagem))
+                return BadRequest(new { mensagem = "Dados da notificação inválidos." });
+
+            nova.DataCriacao = DateTime.UtcNow;
+            nova.Status = StatusNotificacao.Pendente;
+
+            _context.Notificacoes.Add(nova);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { mensagem = "Notificação criada com sucesso.", nova });
         }
 
-        [HttpGet("BuscarVisitantePor")]
-        public async Task<ActionResult<IEnumerable<Visitante>>> GetVisitante([FromQuery] string? nomeVisitante, [FromQuery] string? documento)
+        // 2. Notificações do morador
+        [HttpGet("MinhasNotificacoes/{usuarioId}")]
+        public async Task<IActionResult> GetMinhasNotificacoes(int usuarioId)
         {
-            var query = _context.Visitantes.AsQueryable();
+            var lista = await _context.Notificacoes
+                .Include(n => n.ApartamentoDestino)
+                .Where(n => n.MoradorOrigemId == usuarioId)
+                .OrderByDescending(n => n.DataCriacao)
+                .ToListAsync();
 
-            if (!string.IsNullOrWhiteSpace(nomeVisitante))
-            {
-                query = query.Where(visit => visit.Nome.Contains(nomeVisitante));
-            }
-
-            if (!string.IsNullOrWhiteSpace(documento))
-            {
-                query = query.Where(visit => visit.Documento.Contains(documento));
-            }
-
-            var visitantes = await query.ToListAsync();
-
-            if (visitantes.Count == 0)
-            {
-                return NotFound(new { mensagem = "Nenhum visitante encontrado." });
-            }
-
-            return Ok(visitantes);
+            return Ok(lista);
         }
 
-        [HttpPost("CadastrarVisitante")]
-        public async Task<ActionResult<Visitante>> PostVisitante(Visitante NovoVisitante)
+        // 3. Notificações pendentes para aprovação
+        [HttpGet("PendentesParaAprovacao")]
+        public async Task<IActionResult> GetPendentes()
         {
-            try
-            {       
-                if (string.IsNullOrEmpty(NovoVisitante.Nome) || NovoVisitante.Nome == "string" || 
-                    string.IsNullOrEmpty(NovoVisitante.Documento) || NovoVisitante.Documento == "string" || 
-                    string.IsNullOrEmpty(NovoVisitante.Telefone) || NovoVisitante.Telefone == "string")
-                {
-                    return BadRequest(new { mensagem = "Nome, Documento e Telefone são obrigatórios!" });
-                }
+            var pendentes = await _context.Notificacoes
+                .Include(n => n.MoradorOrigem)
+                .Include(n => n.ApartamentoDestino)
+                .Where(n => n.Status == StatusNotificacao.Pendente)
+                .OrderBy(n => n.DataCriacao)
+                .ToListAsync();
 
-                var visitanteExistente = await _context.Visitantes.FirstOrDefaultAsync(visit => visit.Documento == NovoVisitante.Documento && visit.Cnpj == NovoVisitante.Cnpj);
-
-                if (visitanteExistente != null)
-                {
-                    return Ok(new { mensagem = "Visitante já cadastrado. Deseja gerar um QR code para esta visita?", visitante = visitanteExistente, gerarQrCode = true });
-                }
-
-                _context.Visitantes.Add(NovoVisitante);
-                await _context.SaveChangesAsync();
-
-                return Ok(new { mensagem = "Visitante cadastrado com sucesso", NovoVisitante });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { mensagem = "Erro ao cadastrar visitante!", detalhes = ex.Message });
-            }
+            return Ok(pendentes);
         }
 
-        [HttpPut("AtualizarVisitante/{id}")]
-        public async Task<IActionResult> PutVisitante(int id, [FromBody] Visitante visitante)
+        // 4. Aprovar notificação
+        [HttpPut("Aprovar/{id}")]
+        public async Task<IActionResult> Aprovar(int id)
         {
-            if (id <= 0)
-            {
-                return BadRequest("Visitante inválido.");
-            }
+            var notificacao = await _context.Notificacoes.FindAsync(id);
+            if (notificacao == null)
+                return NotFound(new { mensagem = "Notificação não encontrada." });
 
-            var visitanteTemp = await _context.Visitantes.FindAsync(id);
-
-            if (visitanteTemp == null)
-            {
-                return NotFound();
-            }
-
-            if (!string.IsNullOrEmpty(visitante.Nome) && visitante.Nome != "string" && visitanteTemp.Nome != visitante.Nome)
-            {
-                visitanteTemp.Nome = visitante.Nome;
-                _context.Entry(visitanteTemp).Property(v => v.Nome).IsModified = true;
-            }
-
-            if (!string.IsNullOrEmpty(visitante.Documento) && visitante.Documento != "string" && visitanteTemp.Documento != visitante.Documento)
-            {
-                visitanteTemp.Documento = visitante.Documento;
-                _context.Entry(visitanteTemp).Property(v => v.Documento).IsModified = true;
-            }
-
-            if (!string.IsNullOrEmpty(visitante.Telefone) && visitante.Telefone != "string" && visitanteTemp.Telefone != visitante.Telefone)
-            {
-                visitanteTemp.Telefone = visitante.Telefone;
-                _context.Entry(visitanteTemp).Property(v => v.Telefone).IsModified = true;
-            }
+            notificacao.Status = StatusNotificacao.Aprovada;
+            notificacao.UltimaAtualizacao = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(new { mensagem = "Notificação aprovada." });
         }
 
-
-        [HttpDelete("ExcluirVisitante/{id}")]
-        public async Task<IActionResult> DeletarVisitante(int id)
+        // 5. Rejeitar notificação com comentário
+        [HttpPut("Rejeitar/{id}")]
+        public async Task<IActionResult> Rejeitar(int id, [FromBody] string comentario)
         {
-            if (id <= 0)
-            {
-                return BadRequest("Visitante inválido.");
-            }
+            var notificacao = await _context.Notificacoes.FindAsync(id);
+            if (notificacao == null)
+                return NotFound(new { mensagem = "Notificação não encontrada." });
 
-            var visitante = await _context.Visitantes.FindAsync(id);
-            if (visitante == null)
-            {
-                return NotFound();
-            }
+            notificacao.Status = StatusNotificacao.Rejeitada;
+            notificacao.ComentarioSindico = comentario;
+            notificacao.UltimaAtualizacao = DateTime.UtcNow;
 
-            _context.Visitantes.Remove(visitante);
             await _context.SaveChangesAsync();
 
-            return Ok();
+            return Ok(new { mensagem = "Notificação rejeitada com comentário." });
+        }
+
+        // 6. Notificações recebidas por morador (caso tenha destino)
+        [HttpGet("Recebidas/{apartamentoId}")]
+        public async Task<IActionResult> GetRecebidas(int apartamentoId)
+        {
+            var recebidas = await _context.Notificacoes
+                .Include(n => n.MoradorOrigem)
+                .Where(n => n.ApartamentoDestinoId == apartamentoId && n.Status == StatusNotificacao.Aprovada)
+                .OrderByDescending(n => n.DataCriacao)
+                .ToListAsync();
+
+            return Ok(recebidas);
         }
     }
 }

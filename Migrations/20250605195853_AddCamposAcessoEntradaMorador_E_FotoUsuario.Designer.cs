@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using condominio_API.Data;
 
@@ -11,9 +12,11 @@ using condominio_API.Data;
 namespace Condominio_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250605195853_AddCamposAcessoEntradaMorador_E_FotoUsuario")]
+    partial class AddCamposAcessoEntradaMorador_E_FotoUsuario
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -119,36 +122,18 @@ namespace Condominio_API.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ApartamentoDestinoId")
+                    b.Property<int>("ApartamentoDestinoId")
                         .HasColumnType("int");
 
-                    b.Property<string>("ComentarioSindico")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("DataCriacao")
+                    b.Property<DateTime>("DataHora")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Mensagem")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("varchar(1000)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("MoradorOrigemId")
                         .HasColumnType("int");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Tipo")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Titulo")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<DateTime?>("UltimaAtualizacao")
-                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
@@ -336,7 +321,9 @@ namespace Condominio_API.Migrations
                 {
                     b.HasOne("condominio_API.Models.Apartamento", "ApartamentoDestino")
                         .WithMany()
-                        .HasForeignKey("ApartamentoDestinoId");
+                        .HasForeignKey("ApartamentoDestinoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("condominio_API.Models.Usuario", "MoradorOrigem")
                         .WithMany()

@@ -1,6 +1,22 @@
 [
   {
     "ContainingType": "condominio_API.Controllers.AcessoEntradaMoradorController",
+    "Method": "BuscarEntradaPorId",
+    "RelativePath": "api/AcessoEntradaMorador/BuscarEntradaPorId",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "condominio_API.Controllers.AcessoEntradaMoradorController",
     "Method": "FiltrarEntradasAdmin",
     "RelativePath": "api/AcessoEntradaMorador/FiltrarEntradasAdmin",
     "HttpMethod": "GET",
@@ -91,6 +107,22 @@
         "StatusCode": 200
       }
     ]
+  },
+  {
+    "ContainingType": "condominio_API.Controllers.AcessoEntradaMoradorController",
+    "Method": "RegistrarEntradaManual",
+    "RelativePath": "api/AcessoEntradaMorador/RegistrarEntradaManual",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "EntradaMoradorManualRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
   },
   {
     "ContainingType": "condominio_API.Controllers.AcessoEntradaVisitanteController",
@@ -316,6 +348,101 @@
     ]
   },
   {
+    "ContainingType": "condominio_API.Controllers.NotificacaoController",
+    "Method": "Aprovar",
+    "RelativePath": "api/Notificacao/Aprovar/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "condominio_API.Controllers.NotificacaoController",
+    "Method": "CriarNotificacao",
+    "RelativePath": "api/Notificacao/CriarNotificacao",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "nova",
+        "Type": "condominio_API.Models.Notificacao",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "condominio_API.Controllers.NotificacaoController",
+    "Method": "GetMinhasNotificacoes",
+    "RelativePath": "api/Notificacao/MinhasNotificacoes/{usuarioId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "usuarioId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "condominio_API.Controllers.NotificacaoController",
+    "Method": "GetPendentes",
+    "RelativePath": "api/Notificacao/PendentesParaAprovacao",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "condominio_API.Controllers.NotificacaoController",
+    "Method": "GetRecebidas",
+    "RelativePath": "api/Notificacao/Recebidas/{apartamentoId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "apartamentoId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "condominio_API.Controllers.NotificacaoController",
+    "Method": "Rejeitar",
+    "RelativePath": "api/Notificacao/Rejeitar/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "comentario",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "condominio_API.Controllers.QRCodeTempController",
     "Method": "BuscarQRCodePorVisitante",
     "RelativePath": "api/QRCodeTemp/BuscarQRCodePorVisitante",
@@ -438,6 +565,82 @@
         "IsRequired": true
       }
     ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "condominio_API.Controllers.RelatorioController",
+    "Method": "GerarRelatorioApartamentos",
+    "RelativePath": "api/relatorios/apartamentos",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "condominio_API.Controllers.RelatorioController",
+    "Method": "GerarRelatorioEntradasMorador",
+    "RelativePath": "api/relatorios/entradas-morador",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "condominio_API.Controllers.RelatorioController",
+    "Method": "GerarRelatorioEntradasVisitante",
+    "RelativePath": "api/relatorios/entradas-visitante",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "condominio_API.Controllers.RelatorioController",
+    "Method": "GerarRelatoriosSelecionados",
+    "RelativePath": "api/relatorios/multiplos",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "selecao",
+        "Type": "Condominio_API.Requests.RelatorioMultiploRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "condominio_API.Controllers.RelatorioController",
+    "Method": "GerarRelatorioNotificacoes",
+    "RelativePath": "api/relatorios/notificacoes",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "condominio_API.Controllers.RelatorioController",
+    "Method": "GerarRelatorioUsuarios",
+    "RelativePath": "api/relatorios/usuarios",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "condominio_API.Controllers.RelatorioController",
+    "Method": "GerarRelatorioVisitantes",
+    "RelativePath": "api/relatorios/visitantes",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   },
   {
@@ -637,119 +840,5 @@
       }
     ],
     "ReturnTypes": []
-  },
-  {
-    "ContainingType": "condominio_API.Controllers.VisitanteController",
-    "Method": "PutVisitante",
-    "RelativePath": "api/Visitante/AtualizarVisitante/{id}",
-    "HttpMethod": "PUT",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      },
-      {
-        "Name": "visitante",
-        "Type": "condominio_API.Models.Visitante",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "condominio_API.Controllers.VisitanteController",
-    "Method": "GetVisitante",
-    "RelativePath": "api/Visitante/BuscarVisitantePor",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "nomeVisitante",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "documento",
-        "Type": "System.String",
-        "IsRequired": false
-      }
-    ],
-    "ReturnTypes": [
-      {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[condominio_API.Models.Visitante, Condominio_API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "condominio_API.Controllers.VisitanteController",
-    "Method": "PostVisitante",
-    "RelativePath": "api/Visitante/CadastrarVisitante",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "NovoVisitante",
-        "Type": "condominio_API.Models.Visitante",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": [
-      {
-        "Type": "condominio_API.Models.Visitante",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "condominio_API.Controllers.VisitanteController",
-    "Method": "DeletarVisitante",
-    "RelativePath": "api/Visitante/ExcluirVisitante/{id}",
-    "HttpMethod": "DELETE",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "condominio_API.Controllers.VisitanteController",
-    "Method": "GetTodosVisitantes",
-    "RelativePath": "api/Visitante/ExibirTodosVisitantes",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": [
-      {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[condominio_API.Models.Visitante, Condominio_API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
   }
 ]

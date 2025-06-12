@@ -174,24 +174,24 @@ namespace condominio_API.Controllers
                 }
 
                 var entradas = await query
-    .OrderByDescending(e => e.DataHoraEntrada)
-    .Select(e => new
-    {
-        e.Id,
-        e.UsuarioId,
-        Nome = e.Usuario!.Nome,
-        e.Usuario!.ApartamentoId,
-        Apartamento = e.Usuario!.Apartamento != null ? (int?)e.Usuario.Apartamento.Numero : null,
-        Bloco = e.Usuario!.Apartamento != null ? e.Usuario.Apartamento.Bloco : null,
-        NivelAcesso = e.Usuario!.NivelAcesso.ToString(),
-        e.DataHoraEntrada,
-        entradaPor = e.EntradaPor
-    })
-    .ToListAsync();
+                    .OrderByDescending(e => e.DataHoraEntrada)
+                    .Select(e => new
+                    {
+                        e.Id,
+                        e.UsuarioId,
+                        Nome = e.Usuario!.Nome,
+                        e.Usuario!.ApartamentoId,
+                        Apartamento = e.Usuario!.Apartamento != null ? (int?)e.Usuario.Apartamento.Numero : null,
+                        Bloco = e.Usuario!.Apartamento != null ? e.Usuario.Apartamento.Bloco : null,
+                        NivelAcesso = e.Usuario!.NivelAcesso.ToString(),    
+                        e.DataHoraEntrada,
+                        entradaPor = e.EntradaPor
+                    })
+                    .ToListAsync();
 
                 if (entradas.Count == 0)
                 {
-                    return NotFound(new { mensagem = "Nenhuma entrada encontrada!" });
+                    return Ok(new List<AcessoEntradaMorador>());
                 }
 
                 return Ok(entradas);
@@ -251,5 +251,83 @@ namespace condominio_API.Controllers
                 return StatusCode(500, new { mensagem = "Erro ao listar entradas do apartamento!", detalhes = ex.Message });
             }
         }
+
+        [HttpGet("BuscarEntradaPorId")]
+        public async Task<ActionResult> BuscarEntradaPorId([FromQuery] int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    return BadRequest(new { mensagem = "ID da entrada inválido!" });
+                }
+
+                var entrada = await _context.AcessoEntradaMoradores!
+                    .Include(e => e.Usuario)
+                        .ThenInclude(u => u.Apartamento)
+                    .FirstOrDefaultAsync(e => e.Id == id);
+
+                if (entrada == null)
+                {
+                    return NotFound(new { mensagem = "Entrada não encontrada!" });
+                }
+
+                var resultado = new
+                {
+                    id = entrada.Id,
+                    dataHoraEntrada = entrada.DataHoraEntrada,
+                    entradaPor = entrada.EntradaPor,
+                    codigoRFID = entrada.Usuario?.CodigoRFID,
+                    observacao = entrada.Observacao,
+                    registradoPor = entrada.RegistradoPor,
+                    usuario = new
+                    {
+                        nome = entrada.Usuario?.Nome,
+                        documento = entrada.Usuario?.Documento,
+                        nivelAcesso = entrada.Usuario?.NivelAcesso.ToString().ToLower(),
+                        fotoUrl = entrada.Usuario?.FotoUrl,
+                        apartamento = new
+                        {
+                            numero = entrada.Usuario?.Apartamento?.Numero,
+                            bloco = entrada.Usuario?.Apartamento?.Bloco
+                        }
+                    }
+                };
+
+                return Ok(resultado);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensagem = "Erro ao buscar entrada!", detalhes = ex.Message });
+            }
+        }
+
+        [HttpPost("RegistrarEntradaManual")]
+        public async Task<IActionResult> RegistrarEntradaManual([FromBody] EntradaMoradorManualRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var usuario = await _context.Usuarios.FindAsync(request.UsuarioId);
+            if (usuario == null)
+                return NotFound(new { mensagem = "Usuário não encontrado" });
+
+            var novaEntrada = new AcessoEntradaMorador
+            {
+                UsuarioId = request.UsuarioId,
+                DataHoraEntrada = DateTime.Now,
+                EntradaPor = "2", 
+                Observacao = request.Observacao,
+                RegistradoPor = request.RegistradoPor
+            };
+
+            _context.AcessoEntradaMoradores.Add(novaEntrada);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { mensagem = "Entrada registrada com sucesso", id = novaEntrada.Id });
+        }
+
+
+
     }
 }

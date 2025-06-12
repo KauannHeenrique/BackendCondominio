@@ -19,6 +19,13 @@
             public DateTime DataHoraEntrada { get; set; }
 
             [Required]
-            public string EntradaPor { get; set; } = "1"; 
+            public string EntradaPor { get; set; } = "1";
+
+            [MaxLength(255)]
+            public string? Observacao { get; set; }
+
+            [StringLength(100)]
+            public string? RegistradoPor { get; set; }
+
         }
     }

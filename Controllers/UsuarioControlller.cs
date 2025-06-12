@@ -35,8 +35,6 @@ namespace condominio_API.Controllers
             return await _context.Usuarios.Include(user => user.Apartamento).ToListAsync();
         }
 
-
-
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] AuthRequest request)
         {
@@ -93,6 +91,7 @@ namespace condominio_API.Controllers
                 usuario.NivelAcesso,
                 usuario.Nome,
                 usuario.Email,
+                usuario.ApartamentoId,
                 usuario.Telefone,
                 Bloco = usuario.Apartamento?.Bloco,
                 Apartamento = usuario.Apartamento?.Numero,
