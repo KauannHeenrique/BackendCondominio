@@ -1,4 +1,4 @@
-﻿using Condominio_API.Requests;
+﻿    using Condominio_API.Requests;
 using condominio_API.Data;
 using condominio_API.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -117,15 +117,15 @@ namespace condominio_API.Controllers
 
         [HttpGet("FiltrarEntradasVisitantesAdmin")]
         public async Task<ActionResult> FiltrarEntradasVisitantesAdmin(
-            [FromQuery] string? documento = null,
-            [FromQuery] int? apartamentoId = null,
-            [FromQuery] string? bloco = null,
-            [FromQuery] DateTime? dataInicio = null,
-            [FromQuery] DateTime? dataFim = null)
+    [FromQuery] string? documento = null,
+    [FromQuery] int? numero = null,
+    [FromQuery] string? bloco = null,
+    [FromQuery] DateTime? dataInicio = null,
+    [FromQuery] DateTime? dataFim = null)
         {
             try
             {
-                if (string.IsNullOrEmpty(documento) && !apartamentoId.HasValue && string.IsNullOrEmpty(bloco) && !dataInicio.HasValue && !dataFim.HasValue)
+                if (string.IsNullOrEmpty(documento) && !numero.HasValue && string.IsNullOrEmpty(bloco) && !dataInicio.HasValue && !dataFim.HasValue)
                 {
                     return BadRequest(new { mensagem = "Informe pelo menos um filtro!" });
                 }
@@ -141,15 +141,17 @@ namespace condominio_API.Controllers
                     query = query.Where(e => e.Visitante!.Documento == documento);
                 }
 
-                if (apartamentoId.HasValue)
-                {
-                    query = query.Where(e => e.Usuario!.ApartamentoId == apartamentoId.Value);
-                }
-
                 if (!string.IsNullOrEmpty(bloco))
                 {
                     query = query.Where(e => e.Usuario!.Apartamento!.Bloco == bloco);
                 }
+
+                if (numero.HasValue)
+                {
+                    query = query.Where(e => e.Usuario!.Apartamento!.Numero == numero.Value);
+                }
+
+
 
                 if (dataInicio.HasValue)
                 {
@@ -190,6 +192,7 @@ namespace condominio_API.Controllers
                 return StatusCode(500, new { mensagem = "Erro ao filtrar entradas!", detalhes = ex.Message });
             }
         }
+
 
         [HttpGet("ListarEntradasPorApartamentoDoUsuario")]
         public async Task<ActionResult> ListarEntradasPorApartamentoDoUsuario([FromQuery] int usuarioId)

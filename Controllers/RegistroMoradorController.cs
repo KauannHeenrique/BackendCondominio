@@ -108,6 +108,7 @@ namespace condominio_API.Controllers
 
         [HttpGet("FiltrarEntradasAdmin")]
         public async Task<ActionResult> FiltrarEntradasAdmin(
+    [FromQuery] string? nome = null,
     [FromQuery] string? documento = null,
     [FromQuery] int? numero = null,
     [FromQuery] string? bloco = null,
@@ -117,8 +118,9 @@ namespace condominio_API.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(documento) && !numero.HasValue && string.IsNullOrEmpty(bloco)
-                    && string.IsNullOrEmpty(nivelAcesso) && !dataInicio.HasValue && !dataFim.HasValue)
+                if (string.IsNullOrEmpty(nome) && string.IsNullOrEmpty(documento) && !numero.HasValue &&
+                    string.IsNullOrEmpty(bloco) && string.IsNullOrEmpty(nivelAcesso) &&
+                    !dataInicio.HasValue && !dataFim.HasValue)
                 {
                     return BadRequest(new { mensagem = "Informe pelo menos um filtro!" });
                 }
@@ -127,6 +129,12 @@ namespace condominio_API.Controllers
                     .Include(e => e.Usuario)
                         .ThenInclude(u => u.Apartamento)
                     .AsQueryable();
+
+                if (!string.IsNullOrEmpty(nome))
+                {
+                    var nomeLower = nome.ToLower();
+                    query = query.Where(e => e.Usuario!.Nome.ToLower().Contains(nomeLower));
+                }
 
                 if (!string.IsNullOrEmpty(documento))
                 {
@@ -155,7 +163,6 @@ namespace condominio_API.Controllers
                     query = query.Where(e => e.Usuario!.Apartamento != null && e.Usuario.Apartamento.Bloco == bloco);
                 }
 
-                // 💡 Filtragem por data flexível
                 if (dataInicio.HasValue && dataFim.HasValue)
                 {
                     var inicio = dataInicio.Value.Date;
@@ -183,7 +190,7 @@ namespace condominio_API.Controllers
                         e.Usuario!.ApartamentoId,
                         Apartamento = e.Usuario!.Apartamento != null ? (int?)e.Usuario.Apartamento.Numero : null,
                         Bloco = e.Usuario!.Apartamento != null ? e.Usuario.Apartamento.Bloco : null,
-                        NivelAcesso = e.Usuario!.NivelAcesso.ToString(),    
+                        NivelAcesso = e.Usuario!.NivelAcesso.ToString(),
                         e.DataHoraEntrada,
                         entradaPor = e.EntradaPor
                     })
@@ -201,6 +208,7 @@ namespace condominio_API.Controllers
                 return StatusCode(500, new { mensagem = "Erro ao filtrar entradas!", detalhes = ex.Message });
             }
         }
+
 
         [HttpGet("FiltrarEntradasUsuario")]
         public async Task<ActionResult> FiltrarEntradasUsuario([FromQuery] int usuarioId)
@@ -251,6 +259,7 @@ namespace condominio_API.Controllers
                 return StatusCode(500, new { mensagem = "Erro ao listar entradas do apartamento!", detalhes = ex.Message });
             }
         }
+
 
         [HttpGet("BuscarEntradaPorId")]
         public async Task<ActionResult> BuscarEntradaPorId([FromQuery] int id)

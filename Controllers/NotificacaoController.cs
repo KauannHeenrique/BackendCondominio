@@ -1,7 +1,7 @@
-﻿/*using condominio_API.Models;
+﻿using condominio_API.Data;
+using condominio_API.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace condominio_API.Controllers
 {
@@ -9,65 +9,100 @@ namespace condominio_API.Controllers
     [ApiController]
     public class NotificacaoController : ControllerBase
     {
-        private static List<Notificacao> notificacoes = new List<Notificacao>();
+        private readonly AppDbContext _context;
 
-        [HttpGet]
-        public ActionResult<IEnumerable<Notificacao>> GetNotificacoes()
+        public NotificacaoController(AppDbContext context)
         {
-            return Ok(notificacoes);
+            _context = context;
         }
 
-        [HttpGet("{id}")]
-        public ActionResult<Notificacao> GetNotificacao(int id)
+        // 1. Criar notificação
+        [HttpPost("CriarNotificacao")]
+        public async Task<IActionResult> CriarNotificacao([FromBody] Notificacao nova)
         {
-            var notificacao = notificacoes.FirstOrDefault(n => n.Id == id);
+            if (nova == null || string.IsNullOrWhiteSpace(nova.Mensagem))
+                return BadRequest(new { mensagem = "Dados da notificação inválidos." });
+
+            nova.DataCriacao = DateTime.UtcNow;
+            nova.Status = StatusNotificacao.Pendente;
+
+            _context.Notificacoes.Add(nova);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { mensagem = "Notificação criada com sucesso.", nova });
+        }
+
+        // 2. Notificações do morador
+        [HttpGet("MinhasNotificacoes/{usuarioId}")]
+        public async Task<IActionResult> GetMinhasNotificacoes(int usuarioId)
+        {
+            var lista = await _context.Notificacoes
+                .Include(n => n.ApartamentoDestino)
+                .Where(n => n.MoradorOrigemId == usuarioId)
+                .OrderByDescending(n => n.DataCriacao)
+                .ToListAsync();
+
+            return Ok(lista);
+        }
+
+        // 3. Notificações pendentes para aprovação
+        [HttpGet("PendentesParaAprovacao")]
+        public async Task<IActionResult> GetPendentes()
+        {
+            var pendentes = await _context.Notificacoes
+                .Include(n => n.MoradorOrigem)
+                .Include(n => n.ApartamentoDestino)
+                .Where(n => n.Status == StatusNotificacao.Pendente)
+                .OrderBy(n => n.DataCriacao)
+                .ToListAsync();
+
+            return Ok(pendentes);
+        }
+
+        // 4. Aprovar notificação
+        [HttpPut("Aprovar/{id}")]
+        public async Task<IActionResult> Aprovar(int id)
+        {
+            var notificacao = await _context.Notificacoes.FindAsync(id);
             if (notificacao == null)
-            {
                 return NotFound(new { mensagem = "Notificação não encontrada." });
-            }
-            return Ok(notificacao);
+
+            notificacao.Status = StatusNotificacao.Aprovada;
+            notificacao.UltimaAtualizacao = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { mensagem = "Notificação aprovada." });
         }
 
-        [HttpPost]
-        public ActionResult<Notificacao> PostNotificacao(Notificacao novaNotificacao)
+        // 5. Rejeitar notificação com comentário
+        [HttpPut("Rejeitar/{id}")]
+        public async Task<IActionResult> Rejeitar(int id, [FromBody] string comentario)
         {
-            if (string.IsNullOrEmpty(novaNotificacao.Mensagem))
-            {
-                return BadRequest(new { mensagem = "Mensagem é obrigatória." });
-            }
-
-            var moradorOrigem = UsuarioController.usuarios.FirstOrDefault(u => u.UsuarioId == novaNotificacao.MoradorOrigemId);
-            if (moradorOrigem == null)
-            {
-                return BadRequest(new { mensagem = "Morador de origem não encontrado." });
-            }
-
-            var apartamentoDestino = ApartamentoController.apartamentos.FirstOrDefault(a => a.Id == novaNotificacao.ApartamentoDestinoId);
-            if (apartamentoDestino == null)
-            {
-                return BadRequest(new { mensagem = "Apartamento de destino não encontrado." });
-            }
-
-            int novoId = notificacoes.Count > 0 ? notificacoes.Max(n => n.Id) + 1 : 1;
-            novaNotificacao.Id = novoId;
-            novaNotificacao.DataHora = DateTime.Now;
-
-            notificacoes.Add(novaNotificacao);
-
-            return CreatedAtAction(nameof(GetNotificacao), new { id = novaNotificacao.Id }, novaNotificacao);
-        }
-
-        [HttpDelete("{id}")]
-        public IActionResult DeleteNotificacao(int id)
-        {
-            var notificacao = notificacoes.FirstOrDefault(n => n.Id == id);
+            var notificacao = await _context.Notificacoes.FindAsync(id);
             if (notificacao == null)
-            {
                 return NotFound(new { mensagem = "Notificação não encontrada." });
-            }
 
-            notificacoes.Remove(notificacao);
-            return Ok(new { mensagem = "Notificação removida com sucesso." });
+            notificacao.Status = StatusNotificacao.Rejeitada;
+            notificacao.ComentarioSindico = comentario;
+            notificacao.UltimaAtualizacao = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { mensagem = "Notificação rejeitada com comentário." });
+        }
+
+        // 6. Notificações recebidas por morador (caso tenha destino)
+        [HttpGet("Recebidas/{apartamentoId}")]
+        public async Task<IActionResult> GetRecebidas(int apartamentoId)
+        {
+            var recebidas = await _context.Notificacoes
+                .Include(n => n.MoradorOrigem)
+                .Where(n => n.ApartamentoDestinoId == apartamentoId && n.Status == StatusNotificacao.Aprovada)
+                .OrderByDescending(n => n.DataCriacao)
+                .ToListAsync();
+
+            return Ok(recebidas);
         }
     }
-}*/
+}

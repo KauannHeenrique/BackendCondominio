@@ -62,7 +62,7 @@ namespace condominio_API.Controllers
                 return Ok(new
                 {
                     mensagem = "Por favor, altere sua senha.",
-                    redirectTo = "http://172.20.10.2:3000/changePassword"
+                    redirectTo = "http://localhost:3000/changePassword"
                 });
             }
 
