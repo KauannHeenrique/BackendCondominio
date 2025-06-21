@@ -31,5 +31,8 @@ namespace condominio_API.Models
 
         [StringLength(100)]
         public string? NomeEmpresa { get; set; }
+
+        public bool Status { get; set; } = true;
+
     }
 }

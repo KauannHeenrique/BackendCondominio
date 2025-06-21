@@ -112,6 +112,13 @@ namespace condominio_API.Controllers
                 _context.Entry(visitanteTemp).Property(v => v.Telefone).IsModified = true;
             }
 
+            if (visitante.Status != visitanteTemp.Status)
+            {
+                visitanteTemp.Status = visitante.Status;
+                _context.Entry(visitanteTemp).Property(v => v.Status).IsModified = true;
+            }
+
+
             await _context.SaveChangesAsync();
 
             return NoContent();

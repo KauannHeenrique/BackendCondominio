@@ -17,8 +17,8 @@
   },
   {
     "ContainingType": "condominio_API.Controllers.AcessoEntradaMoradorController",
-    "Method": "BuscarPorNome",
-    "RelativePath": "api/AcessoEntradaMorador/BuscarPorNome",
+    "Method": "FiltrarEntradasAdmin",
+    "RelativePath": "api/AcessoEntradaMorador/FiltrarEntradasAdmin",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -27,18 +27,7 @@
         "Name": "nome",
         "Type": "System.String",
         "IsRequired": false
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "condominio_API.Controllers.AcessoEntradaMoradorController",
-    "Method": "FiltrarEntradasAdmin",
-    "RelativePath": "api/AcessoEntradaMorador/FiltrarEntradasAdmin",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
+      },
       {
         "Name": "documento",
         "Type": "System.String",

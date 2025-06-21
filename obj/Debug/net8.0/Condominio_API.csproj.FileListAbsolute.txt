@@ -254,10 +254,10 @@ C:\workspace\tcc_kauan\backend\obj\Debug\net8.0\staticwebassets\msbuild.build.Co
 C:\workspace\tcc_kauan\backend\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.Condominio_API.props
 C:\workspace\tcc_kauan\backend\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.Condominio_API.props
 C:\workspace\tcc_kauan\backend\obj\Debug\net8.0\staticwebassets.pack.json
-C:\workspace\tcc_kauan\backend\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\workspace\tcc_kauan\backend\obj\Debug\net8.0\Condomin.A09F3EEB.Up2Date
 C:\workspace\tcc_kauan\backend\obj\Debug\net8.0\Condominio_API.dll
 C:\workspace\tcc_kauan\backend\obj\Debug\net8.0\refint\Condominio_API.dll
 C:\workspace\tcc_kauan\backend\obj\Debug\net8.0\Condominio_API.pdb
 C:\workspace\tcc_kauan\backend\obj\Debug\net8.0\Condominio_API.genruntimeconfig.cache
 C:\workspace\tcc_kauan\backend\obj\Debug\net8.0\ref\Condominio_API.dll
+C:\workspace\tcc_kauan\backend\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

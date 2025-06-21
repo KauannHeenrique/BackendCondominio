@@ -72,6 +72,13 @@
         ],
         "parameters": [
           {
+            "name": "nome",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "documento",
             "in": "query",
             "schema": {
@@ -136,27 +143,6 @@
             "schema": {
               "type": "integer",
               "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/AcessoEntradaMorador/BuscarPorNome": {
-      "get": {
-        "tags": [
-          "AcessoEntradaMorador"
-        ],
-        "parameters": [
-          {
-            "name": "nome",
-            "in": "query",
-            "schema": {
-              "type": "string"
             }
           }
         ],
@@ -2144,6 +2130,9 @@
             "minLength": 0,
             "type": "string",
             "nullable": true
+          },
+          "status": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
