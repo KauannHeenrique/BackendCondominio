@@ -103,44 +103,51 @@ namespace condominio_API.Controllers
 
         [HttpGet("BuscarUsuarioPor")]
         public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuario(
-            [FromQuery] int? id,
-            [FromQuery] string? nomeUsuario,
-            [FromQuery] string? documento,
-            [FromQuery] string? emailUsuario)
+    [FromQuery] int? id,
+    [FromQuery] string? nome,
+    [FromQuery] string? documento,
+    [FromQuery] string? bloco,
+    [FromQuery] string? apartamento,
+    [FromQuery] int? nivelAcesso,
+    [FromQuery] bool? status)
         {
             var query = _context.Usuarios
-                .Include(u => u.Apartamento) 
+                .Include(u => u.Apartamento)
                 .AsQueryable();
 
             if (id.HasValue)
-            {
                 query = query.Where(user => user.UsuarioId == id.Value);
-            }
 
-            if (!string.IsNullOrWhiteSpace(nomeUsuario))
-            {
-                query = query.Where(user => user.Nome.Contains(nomeUsuario));
-            }
+            if (!string.IsNullOrWhiteSpace(nome))
+                query = query.Where(user => user.Nome.Contains(nome));
 
             if (!string.IsNullOrWhiteSpace(documento))
-            {
                 query = query.Where(user => user.Documento.Contains(documento));
+
+            if (!string.IsNullOrWhiteSpace(bloco))
+                query = query.Where(user => user.Apartamento != null && user.Apartamento.Bloco.Contains(bloco));
+
+            if (!string.IsNullOrWhiteSpace(apartamento))
+                query = query.Where(user => user.Apartamento != null && user.Apartamento.Numero.ToString().Contains(apartamento));
+
+            if (nivelAcesso.HasValue)
+            {
+                var nivelEnum = (NivelAcessoEnum)nivelAcesso.Value;
+                query = query.Where(user => user.NivelAcesso == nivelEnum);
             }
 
-            if (!string.IsNullOrWhiteSpace(emailUsuario))
-            {
-                query = query.Where(user => user.Email.Contains(emailUsuario));
-            }
+            if (status.HasValue)
+                query = query.Where(user => user.Status == status.Value);
 
             var usuarios = await query.ToListAsync();
 
             if (usuarios.Count == 0)
-            {
                 return NotFound(new { mensagem = "Nenhum usuário encontrado." });
-            }
 
             return Ok(usuarios);
         }
+
+
 
 
         [HttpPost("AdicionarUsuario")]

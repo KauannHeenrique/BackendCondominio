@@ -34,5 +34,8 @@ namespace condominio_API.Models
 
         public bool Status { get; set; } = true;
 
+        public bool PrestadorServico { get; set; } = false;
+
+
     }
 }

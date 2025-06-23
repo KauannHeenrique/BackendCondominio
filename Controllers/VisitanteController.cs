@@ -25,29 +25,51 @@ namespace condominio_API.Controllers
         }
 
         [HttpGet("BuscarVisitantePor")]
-        public async Task<ActionResult<IEnumerable<Visitante>>> GetVisitante([FromQuery] string? nomeVisitante, [FromQuery] string? documento)
+        public async Task<ActionResult<IEnumerable<Visitante>>> GetVisitante(
+    [FromQuery] string? nomeVisitante,
+    [FromQuery] string? documento,
+    [FromQuery] string? telefone,
+    [FromQuery] bool? status,
+    [FromQuery] bool? prestadorServico)
         {
             var query = _context.Visitantes.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(nomeVisitante))
             {
-                query = query.Where(visit => visit.Nome.Contains(nomeVisitante));
+                query = query.Where(v => v.Nome.Contains(nomeVisitante));
             }
 
             if (!string.IsNullOrWhiteSpace(documento))
             {
-                query = query.Where(visit => visit.Documento.Contains(documento));
+                query = query.Where(v => v.Documento.Contains(documento));
+            }
+
+            if (!string.IsNullOrWhiteSpace(telefone))
+            {
+                query = query.Where(v => v.Telefone.Contains(telefone));
+            }
+
+            if (status.HasValue)
+            {
+                query = query.Where(v => v.Status == status.Value);
+
+            }
+
+            if (prestadorServico.HasValue)
+            {
+                query = query.Where(v => v.PrestadorServico == prestadorServico.Value);
             }
 
             var visitantes = await query.ToListAsync();
 
-            if (visitantes.Count == 0)
+            if (!visitantes.Any())
             {
                 return NotFound(new { mensagem = "Nenhum visitante encontrado." });
             }
 
             return Ok(visitantes);
         }
+
 
         [HttpPost("CadastrarVisitante")]
         public async Task<ActionResult<Visitante>> PostVisitante(Visitante NovoVisitante)

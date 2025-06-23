@@ -1129,7 +1129,7 @@
             }
           },
           {
-            "name": "nomeUsuario",
+            "name": "nome",
             "in": "query",
             "schema": {
               "type": "string"
@@ -1143,10 +1143,32 @@
             }
           },
           {
-            "name": "emailUsuario",
+            "name": "bloco",
             "in": "query",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "apartamento",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "nivelAcesso",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -1427,6 +1449,27 @@
             "in": "query",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "telefone",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "prestadorServico",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -2132,6 +2175,9 @@
             "nullable": true
           },
           "status": {
+            "type": "boolean"
+          },
+          "prestadorServico": {
             "type": "boolean"
           }
         },

@@ -741,7 +741,7 @@
         "IsRequired": false
       },
       {
-        "Name": "nomeUsuario",
+        "Name": "nome",
         "Type": "System.String",
         "IsRequired": false
       },
@@ -751,8 +751,23 @@
         "IsRequired": false
       },
       {
-        "Name": "emailUsuario",
+        "Name": "bloco",
         "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "apartamento",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "nivelAcesso",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "status",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "IsRequired": false
       }
     ],
@@ -883,6 +898,21 @@
       {
         "Name": "documento",
         "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "telefone",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "status",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "prestadorServico",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "IsRequired": false
       }
     ],
