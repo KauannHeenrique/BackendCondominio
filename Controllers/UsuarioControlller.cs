@@ -9,6 +9,7 @@ using condominio_API.Services;
 using Condominio_API.Requests;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
+using Org.BouncyCastle.Crypto.Generators;
 
 
 namespace condominio_API.Controllers
@@ -20,13 +21,14 @@ namespace condominio_API.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IEmailService _emailService;
-        private readonly IResetPasswordEmailService _resetPasswordEmailService;
-        public UsuarioController(AppDbContext context, IEmailService emailService, IResetPasswordEmailService resetPasswordEmailService)
+
+        public UsuarioController(AppDbContext context, IEmailService emailService)
         {
             _context = context;
             _emailService = emailService;
-            _resetPasswordEmailService = resetPasswordEmailService;
         }
+
+
 
         [HttpGet("ExibirTodosUsuarios")]
 
@@ -150,57 +152,50 @@ namespace condominio_API.Controllers
 
 
 
-        [HttpPost("AdicionarUsuario")]
-        public async Task<ActionResult<Usuario>> PostUsuario(Usuario novoUsuario)
+        [HttpPost("CadastrarUsuario")]
+        public async Task<IActionResult> CadastrarUsuario([FromBody] Usuario novoUsuario)
         {
             try
             {
-                if (novoUsuario == null)
+                if (string.IsNullOrWhiteSpace(novoUsuario.Email))
                 {
-                    return BadRequest(new { mensagem = "Por favor, preencha todos os campos" });
+                    return BadRequest(new { mensagem = "É necessário informar um e-mail válido." });
                 }
 
-                var moradorFirst = await _context.Usuarios.FirstOrDefaultAsync(user => user.Documento == novoUsuario.Documento
-                    || user.Email == novoUsuario.Email);
-
-                if (moradorFirst != null)
+                // Verifica se o e-mail já está em uso (opcional)
+                var emailExistente = _context.Usuarios.Any(u => u.Email == novoUsuario.Email);
+                if (emailExistente)
                 {
-                    return BadRequest(new { mensagem = "Documento ou e-mail já cadastrado. Por favor, tente novamente." });
+                    return BadRequest(new { mensagem = "Este e-mail já está em uso." });
                 }
 
-                if ((novoUsuario.NivelAcesso == NivelAcessoEnum.Sindico || novoUsuario.NivelAcesso == NivelAcessoEnum.Morador)
-                    && (!novoUsuario.ApartamentoId.HasValue || novoUsuario.ApartamentoId <= 0))
-                {
-                    return BadRequest(new { mensagem = "Síndicos e moradores devem ter um apartamento válido." });
-                }
+                // Gera uma senha padrão
+                string senhaPadrao = "123456"; // ou gere dinamicamente
 
-                // Definir senha padrão e marcar como temporária
-                novoUsuario.Senha = HashHelper.GerarHash("Condominio123");
-                novoUsuario.IsTemporaryPassword = true;
+                // Criptografa a senha (exemplo: hash básico)
+                novoUsuario.Senha = HashHelper.GerarHash(senhaPadrao);
+                novoUsuario.DataCadastro = DateTime.UtcNow;
 
+                // Salva no banco
                 _context.Usuarios.Add(novoUsuario);
                 await _context.SaveChangesAsync();
 
-                // Enviar e-mail com a senha padrão
-                await _emailService.SendWelcomeEmailAsync(novoUsuario.Email, "Condominio123");
-                    
-                var usuarioRetornado = new
-                {
-                    novoUsuario.UsuarioId,
-                    novoUsuario.Nome,
-                    novoUsuario.Email,
-                    novoUsuario.NivelAcesso,
-                    novoUsuario.ApartamentoId,
-                    novoUsuario.DataCadastro
-                };
+                // Envia e-mail
+                _ = Task.Run(() => _emailService.SendWelcomeEmailAsync(novoUsuario.Email, senhaPadrao));
 
-                return Ok(new { mensagem = "Usuário cadastrado com sucesso! Um e-mail com a senha foi enviado.", usuarioRetornado });
+
+                return Ok(new { mensagem = "Usuário cadastrado com sucesso." });
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(new { mensagem = "Erro: e-mail não informado corretamente.", detalhes = ex.Message });
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { mensagem = "Erro ao cadastrar usuário ou enviar e-mail.", detalhes = ex.Message });
             }
         }
+
 
         [HttpPut("AtualizarUsuario/{id}")]
         public async Task<IActionResult> PutUsuario(int id, [FromBody] AtualizarUsuarioRequest usuario)
@@ -322,44 +317,51 @@ namespace condominio_API.Controllers
         }
 
 
-        [HttpPut("ResetarSenha/{id}")]
-        public async Task<IActionResult> ResetarSenha(int id)
+        [HttpPut("ResetarSenha/{UsuarioId}")]
+        public async Task<IActionResult> ResetarSenha(int UsuarioId)
         {
-            if (id <= 0)
+            try
             {
-                return BadRequest("Usuário inválido.");
+                var usuario = await _context.Usuarios.FindAsync(UsuarioId);
+
+                if (usuario == null)
+                {
+                    Console.WriteLine($"[ERRO] Usuário com ID {UsuarioId} não encontrado.");
+                    return NotFound(new { mensagem = "Usuário não encontrado." });
+                }
+
+                Console.WriteLine($"[INFO] Usuário encontrado: {usuario.Nome}");
+                Console.WriteLine($"[INFO] Email encontrado: {usuario.Email}");
+
+                if (string.IsNullOrWhiteSpace(usuario.Email))
+                {
+                    Console.WriteLine("[ERRO] Campo de e-mail está vazio ou nulo.");
+                    return BadRequest(new { mensagem = "Este usuário não possui e-mail cadastrado." });
+                }
+
+                string novaSenha = "Condominio123";
+                usuario.Senha = HashHelper.GerarHash(novaSenha);
+                usuario.IsTemporaryPassword = true;
+
+                _context.Usuarios.Update(usuario);
+                await _context.SaveChangesAsync();
+
+
+                _ = Task.Run(() => _emailService.SendResetPasswordEmailAsync(usuario.Email, novaSenha));
+
+
+
+                return Ok(new { mensagem = "Senha redefinida e e-mail enviado com sucesso." });
             }
-
-            var usuario = await _context.Usuarios.FindAsync(id);
-
-            if (usuario == null)
+            catch (ArgumentNullException ex)
             {
-                return NotFound("Usuário não encontrado.");
+                return BadRequest(new { mensagem = "Erro: e-mail não informado corretamente.", detalhes = ex.Message });
             }
-
-            // Definir senha padrão do condomínio
-            string senhaHash = HashHelper.GerarHash("Condominio123");
-            usuario.Senha = senhaHash;
-
-            // Definir como senha temporária
-            usuario.IsTemporaryPassword = true;
-
-            // Marcar a senha como modificada
-            _context.Entry(usuario).Property(u => u.Senha).IsModified = true;
-            _context.Entry(usuario).Property(u => u.IsTemporaryPassword).IsModified = true;
-
-            // Enviar e-mail informando o usuário da senha resetada
-            await _resetPasswordEmailService.SendResetPasswordEmailAsync(usuario.Email, "Condominio123");
-
-            // Salvar as mudanças no banco de dados
-            await _context.SaveChangesAsync();
-
-            return Ok("Senha resetada com sucesso. Um e-mail foi enviado com a senha temporária.");
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensagem = "Erro ao redefinir senha ou enviar e-mail.", detalhes = ex.Message });
+            }
         }
-
-
-
-
 
         [HttpDelete("ExcluirUsuario/{id}")]
         public async Task<IActionResult> DeleteUsuario(int id)

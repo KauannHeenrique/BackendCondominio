@@ -1205,7 +1205,7 @@
         }
       }
     },
-    "/api/Usuario/AdicionarUsuario": {
+    "/api/Usuario/CadastrarUsuario": {
       "post": {
         "tags": [
           "Usuario"
@@ -1231,24 +1231,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/Usuario"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Usuario"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Usuario"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
@@ -1347,14 +1330,14 @@
         }
       }
     },
-    "/api/Usuario/ResetarSenha/{id}": {
+    "/api/Usuario/ResetarSenha/{UsuarioId}": {
       "put": {
         "tags": [
           "Usuario"
         ],
         "parameters": [
           {
-            "name": "id",
+            "name": "UsuarioId",
             "in": "path",
             "required": true,
             "schema": {

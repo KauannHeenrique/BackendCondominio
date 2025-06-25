@@ -17,7 +17,7 @@ builder.Services.AddCors(options =>
             .WithOrigins(
                 "http://172.20.10.2:3000",
                 "http://192.168.1.9:3000",
-                "http://192.168.54.85:3000"
+                "http://192.168.18.85:3000"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
@@ -34,6 +34,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     ));
 
 builder.Services.AddScoped<RelatorioService>();
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IResetPasswordEmailService, ResetPasswordEmailService>();
 
