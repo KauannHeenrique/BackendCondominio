@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\workspace\\tcc_kauan\\backend\\Condominio_API.csproj": {}
+    "C:\\workspace\\tcc\\tcc\\backend\\Condominio_API.csproj": {}
   },
   "projects": {
-    "C:\\workspace\\tcc_kauan\\backend\\Condominio_API.csproj": {
+    "C:\\workspace\\tcc\\tcc\\backend\\Condominio_API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\workspace\\tcc_kauan\\backend\\Condominio_API.csproj",
+        "projectUniqueName": "C:\\workspace\\tcc\\tcc\\backend\\Condominio_API.csproj",
         "projectName": "Condominio_API",
-        "projectPath": "C:\\workspace\\tcc_kauan\\backend\\Condominio_API.csproj",
+        "projectPath": "C:\\workspace\\tcc\\tcc\\backend\\Condominio_API.csproj",
         "packagesPath": "C:\\Users\\thiag\\.nuget\\packages\\",
-        "outputPath": "C:\\workspace\\tcc_kauan\\backend\\obj\\",
+        "outputPath": "C:\\workspace\\tcc\\tcc\\backend\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

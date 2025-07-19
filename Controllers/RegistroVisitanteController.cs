@@ -30,7 +30,7 @@ namespace condominio_API.Controllers
                     return BadRequest(new { mensagem = "O QR code é obrigatório!" });
                 }
 
-                // Busca o QR code ativo em QRCodesTemp
+                // busca o qr code ativo nos temporarios
                 var qrCode = await _context.QRCodesTemp!
                     .Include(q => q.Visitante)
                     .Include(q => q.Morador)
@@ -182,7 +182,7 @@ namespace condominio_API.Controllers
 
                 if (entradas.Count == 0)
                 {
-                    return NotFound(new { mensagem = "Nenhuma entrada encontrada!" });
+                    return Ok(new List<object>()); // Retorna lista vazia
                 }
 
                 return Ok(entradas);
@@ -237,7 +237,7 @@ namespace condominio_API.Controllers
 
                 if (entradas.Count == 0)
                 {
-                    return NotFound(new { mensagem = "Nenhuma entrada de visitante encontrada para o apartamento deste usuário!" });
+                    return Ok(new List<object>()); // Retorna lista vazia
                 }
 
                 return Ok(entradas);

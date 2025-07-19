@@ -82,7 +82,7 @@ namespace condominio_API.Controllers
                     return BadRequest(new { mensagem = "Este apartamento já está cadastrado!" });
                 }
 
-                // Verificar se a situação do apartamento é válida
+                // verifica se a situação do apartamento é válida
                 if (!Enum.IsDefined(typeof(SituacaoApartamento), novoApartamento.Situacao))
                 {
                     return BadRequest(new { mensagem = "Situação do apartamento inválida." });
@@ -114,7 +114,7 @@ namespace condominio_API.Controllers
                 return NotFound(new { mensagem = "Apartamento não encontrado." });
             }
 
-            // Verifica duplicidade: mesmo bloco e número, mas com ID diferente
+            // Verifica se jám ap antes de cadastrar - mesmo bloco e número, mas com id diferente
             var duplicado = await _context.Apartamentos
                 .AnyAsync(a => a.Id != id && a.Bloco == apartamento.Bloco && a.Numero == apartamento.Numero);
 
@@ -123,7 +123,6 @@ namespace condominio_API.Controllers
                 return BadRequest(new { mensagem = "Já existe um apartamento com esse bloco e número." });
             }
 
-            // Atualiza os campos
             apartamentoTemp.Bloco = apartamento.Bloco;
             apartamentoTemp.Numero = apartamento.Numero;
             apartamentoTemp.Proprietario = apartamento.Proprietario;

@@ -28,7 +28,7 @@ namespace condominio_API.Services
 
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(_emailSettings.SenderName, _emailSettings.SenderEmail));
-            message.To.Add(MailboxAddress.Parse(toEmail)); // Substitui a versão antiga com ""
+            message.To.Add(MailboxAddress.Parse(toEmail));
             message.Subject = "Bem-vindo ao condomínio JK";
 
             var bodyBuilder = new BodyBuilder

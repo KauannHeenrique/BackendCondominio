@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using QRCoder; // gera os qrcodes
-using System.Drawing; // usado no Bitmap
+using System.Drawing; // usado no bitmap
 
 namespace condominio_API.Controllers
 {
@@ -112,7 +112,7 @@ namespace condominio_API.Controllers
                         q.DataCriacao,
                         q.DataValidade,
                         q.Status,
-                        QrCodeImagem = Convert.ToBase64String(q.QrCodeImagem), // Converte byte pra base 64 no retorno
+                        QrCodeImagem = Convert.ToBase64String(q.QrCodeImagem), // converte byte pra base 64 no retorno
                         Morador = new { q.Morador.UsuarioId, q.Morador.Nome }, 
                         Visitante = new { q.Visitante.VisitanteId, q.Visitante.Nome, q.Visitante.Documento, q.Visitante.Telefone },
                         IsValid = q.Status && q.DataValidade >= DateTime.Now

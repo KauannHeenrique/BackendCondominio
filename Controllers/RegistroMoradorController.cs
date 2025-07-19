@@ -114,13 +114,14 @@ namespace condominio_API.Controllers
     [FromQuery] string? bloco = null,
     [FromQuery] string? nivelAcesso = null,
     [FromQuery] DateTime? dataInicio = null,
-    [FromQuery] DateTime? dataFim = null)
+    [FromQuery] DateTime? dataFim = null,
+    [FromQuery] int? apartamentoId = null) // ✅ Novo filtro
         {
             try
             {
                 if (string.IsNullOrEmpty(nome) && string.IsNullOrEmpty(documento) && !numero.HasValue &&
                     string.IsNullOrEmpty(bloco) && string.IsNullOrEmpty(nivelAcesso) &&
-                    !dataInicio.HasValue && !dataFim.HasValue)
+                    !dataInicio.HasValue && !dataFim.HasValue && !apartamentoId.HasValue)
                 {
                     return BadRequest(new { mensagem = "Informe pelo menos um filtro!" });
                 }
@@ -163,6 +164,12 @@ namespace condominio_API.Controllers
                     query = query.Where(e => e.Usuario!.Apartamento != null && e.Usuario.Apartamento.Bloco == bloco);
                 }
 
+                // ✅ Novo filtro por ID do Apartamento
+                if (apartamentoId.HasValue)
+                {
+                    query = query.Where(e => e.Usuario!.ApartamentoId == apartamentoId.Value);
+                }
+
                 if (dataInicio.HasValue && dataFim.HasValue)
                 {
                     var inicio = dataInicio.Value.Date;
@@ -198,8 +205,9 @@ namespace condominio_API.Controllers
 
                 if (entradas.Count == 0)
                 {
-                    return Ok(new List<AcessoEntradaMorador>());
+                    return Ok(new List<object>()); // Retorna lista vazia
                 }
+
 
                 return Ok(entradas);
             }
@@ -208,6 +216,7 @@ namespace condominio_API.Controllers
                 return StatusCode(500, new { mensagem = "Erro ao filtrar entradas!", detalhes = ex.Message });
             }
         }
+
 
 
         [HttpGet("FiltrarEntradasUsuario")]
@@ -249,7 +258,7 @@ namespace condominio_API.Controllers
 
                 if (entradas.Count == 0)
                 {
-                    return NotFound(new { mensagem = "Nenhuma entrada encontrada para o apartamento deste usuário!" });
+                    return Ok(new List<object>()); // Retorna lista vazia
                 }
 
                 return Ok(entradas);

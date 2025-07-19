@@ -14,9 +14,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy
-            .WithOrigins(
+            .WithOrigins(    // ips para o cors permitir o acesso do front com a api
                 "http://172.20.10.2:3000",
                 "http://192.168.1.9:3000",
+                "http://192.168.1.9:3001",
                 "http://192.168.18.85:3000"
             )
             .AllowAnyHeader()
@@ -34,6 +35,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     ));
 
 builder.Services.AddScoped<RelatorioService>();
+builder.Services.AddScoped<NotificacaoService>(); // ✅ Adicione esta linha
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IEmailService, EmailService>();

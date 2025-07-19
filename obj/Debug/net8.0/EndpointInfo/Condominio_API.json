@@ -122,6 +122,14 @@
               "type": "string",
               "format": "date-time"
             }
+          },
+          {
+            "name": "apartamentoId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
           }
         ],
         "responses": {
@@ -576,6 +584,38 @@
         }
       }
     },
+    "/api/Atividades/Recentes/{usuarioId}": {
+      "get": {
+        "tags": [
+          "Atividades"
+        ],
+        "parameters": [
+          {
+            "name": "usuarioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 5
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Notificacao/CriarNotificacao": {
       "post": {
         "tags": [
@@ -585,17 +625,59 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Notificacao"
+                "$ref": "#/components/schemas/CriarNotificacaoRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/Notificacao"
+                "$ref": "#/components/schemas/CriarNotificacaoRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/Notificacao"
+                "$ref": "#/components/schemas/CriarNotificacaoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Notificacao/{id}/atualizar": {
+      "put": {
+        "tags": [
+          "Notificacao"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AtualizarNotificacaoRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AtualizarNotificacaoRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AtualizarNotificacaoRequest"
               }
             }
           }
@@ -621,6 +703,32 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "criadoPorSindico",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "responses": {
@@ -630,26 +738,63 @@
         }
       }
     },
-    "/api/Notificacao/PendentesParaAprovacao": {
+    "/api/Notificacao/Recebidas/{usuarioId}": {
       "get": {
-        "tags": [
-          "Notificacao"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/Notificacao/Aprovar/{id}": {
-      "put": {
         "tags": [
           "Notificacao"
         ],
         "parameters": [
           {
-            "name": "id",
+            "name": "usuarioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "criadoPorSindico",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Notificacao/AlertasAtivos/{usuarioId}": {
+      "get": {
+        "tags": [
+          "Notificacao"
+        ],
+        "parameters": [
+          {
+            "name": "usuarioId",
             "in": "path",
             "required": true,
             "schema": {
@@ -665,56 +810,14 @@
         }
       }
     },
-    "/api/Notificacao/Rejeitar/{id}": {
-      "put": {
-        "tags": [
-          "Notificacao"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "string"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "type": "string"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/Notificacao/Recebidas/{apartamentoId}": {
+    "/api/Notificacao/{id}/detalhes": {
       "get": {
         "tags": [
           "Notificacao"
         ],
         "parameters": [
           {
-            "name": "apartamentoId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -1730,6 +1833,23 @@
         },
         "additionalProperties": false
       },
+      "AtualizarNotificacaoRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/StatusNotificacao"
+          },
+          "comentario": {
+            "type": "string",
+            "nullable": true
+          },
+          "marcarComoLida": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "AtualizarUsuarioRequest": {
         "type": "object",
         "properties": {
@@ -1778,6 +1898,40 @@
           "senha": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CriarNotificacaoRequest": {
+        "type": "object",
+        "properties": {
+          "titulo": {
+            "type": "string",
+            "nullable": true
+          },
+          "mensagem": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipo": {
+            "$ref": "#/components/schemas/TipoNotificacao"
+          },
+          "moradorOrigemId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "apartamentoDestinoId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "usuarioDestinoId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "criadoPorSindico": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -1846,68 +2000,6 @@
         ],
         "type": "integer",
         "format": "int32"
-      },
-      "Notificacao": {
-        "required": [
-          "dataCriacao",
-          "mensagem",
-          "moradorOrigemId",
-          "status",
-          "tipo",
-          "titulo"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "tipo": {
-            "$ref": "#/components/schemas/TipoNotificacao"
-          },
-          "titulo": {
-            "maxLength": 100,
-            "minLength": 1,
-            "type": "string"
-          },
-          "mensagem": {
-            "maxLength": 1000,
-            "minLength": 1,
-            "type": "string"
-          },
-          "status": {
-            "$ref": "#/components/schemas/StatusNotificacao"
-          },
-          "comentarioSindico": {
-            "type": "string",
-            "nullable": true
-          },
-          "dataCriacao": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "ultimaAtualizacao": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "moradorOrigemId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "moradorOrigem": {
-            "$ref": "#/components/schemas/Usuario"
-          },
-          "apartamentoDestinoId": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "apartamentoDestino": {
-            "$ref": "#/components/schemas/Apartamento"
-          }
-        },
-        "additionalProperties": false
       },
       "QRCodeRequest": {
         "required": [
@@ -2024,7 +2116,8 @@
           1,
           2,
           3,
-          4
+          4,
+          5
         ],
         "type": "integer",
         "format": "int32"
@@ -2034,7 +2127,8 @@
           1,
           2,
           3,
-          4
+          4,
+          5
         ],
         "type": "integer",
         "format": "int32"

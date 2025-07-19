@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using condominio_API.Data;
 
@@ -11,9 +12,11 @@ using condominio_API.Data;
 namespace Condominio_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250717170350_AddNotificacaoDestinatario")]
+    partial class AddNotificacaoDestinatario
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -111,31 +114,6 @@ namespace Condominio_API.Migrations
                     b.ToTable("Apartamentos");
                 });
 
-            modelBuilder.Entity("condominio_API.Models.AtividadeView", b =>
-                {
-                    b.Property<DateTime>("DataRegistro")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Descricao")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Tipo")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int");
-
-                    b.ToTable((string)null);
-
-                    b.ToView("vw_atividades_recentes", (string)null);
-                });
-
             modelBuilder.Entity("condominio_API.Models.Notificacao", b =>
                 {
                     b.Property<int>("Id")
@@ -147,9 +125,6 @@ namespace Condominio_API.Migrations
                     b.Property<string>("ComentarioSindico")
                         .HasColumnType("longtext");
 
-                    b.Property<bool>("CriadoPorSindico")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<DateTime>("DataCriacao")
                         .HasColumnType("datetime(6)");
 
@@ -160,6 +135,9 @@ namespace Condominio_API.Migrations
 
                     b.Property<int>("MoradorOrigemId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("ParaTodos")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -206,44 +184,6 @@ namespace Condominio_API.Migrations
                     b.HasIndex("UsuarioDestinoId");
 
                     b.ToTable("NotificacaoDestinatarios");
-                });
-
-            modelBuilder.Entity("condominio_API.Models.NotificacaoHistorico", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Acao")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Comentario")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("DataRegistro")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("NotificacaoId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("StatusAnterior")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("StatusNovo")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NotificacaoId");
-
-                    b.HasIndex("UsuarioId");
-
-                    b.ToTable("NotificacaoHistoricos");
                 });
 
             modelBuilder.Entity("condominio_API.Models.QRCodeTemp", b =>
@@ -455,25 +395,6 @@ namespace Condominio_API.Migrations
                     b.Navigation("UsuarioDestino");
                 });
 
-            modelBuilder.Entity("condominio_API.Models.NotificacaoHistorico", b =>
-                {
-                    b.HasOne("condominio_API.Models.Notificacao", "Notificacao")
-                        .WithMany("Historico")
-                        .HasForeignKey("NotificacaoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("condominio_API.Models.Usuario", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Notificacao");
-
-                    b.Navigation("Usuario");
-                });
-
             modelBuilder.Entity("condominio_API.Models.QRCodeTemp", b =>
                 {
                     b.HasOne("condominio_API.Models.Usuario", "Morador")
@@ -505,8 +426,6 @@ namespace Condominio_API.Migrations
             modelBuilder.Entity("condominio_API.Models.Notificacao", b =>
                 {
                     b.Navigation("Destinatarios");
-
-                    b.Navigation("Historico");
                 });
 #pragma warning restore 612, 618
         }

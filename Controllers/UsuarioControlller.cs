@@ -29,7 +29,6 @@ namespace condominio_API.Controllers
         }
 
 
-
         [HttpGet("ExibirTodosUsuarios")]
 
         public async Task<ActionResult<IEnumerable<Usuario>>> GetTodosUsuarios()
@@ -50,11 +49,11 @@ namespace condominio_API.Controllers
 
             var token = new TokenService().GerarJwtToken(usuario);
 
-            // Adicionar o token ao cookie HttpOnly
+            // adiciona o token ao cookie 
             Response.Cookies.Append("jwt", token, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false, // use true apenas com HTTPS
+                Secure = false, // true apenas quando rodar em HTTPS
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTimeOffset.UtcNow.AddHours(1)
             });
@@ -149,9 +148,6 @@ namespace condominio_API.Controllers
             return Ok(usuarios);
         }
 
-
-
-
         [HttpPost("CadastrarUsuario")]
         public async Task<IActionResult> CadastrarUsuario([FromBody] Usuario novoUsuario)
         {
@@ -162,25 +158,24 @@ namespace condominio_API.Controllers
                     return BadRequest(new { mensagem = "É necessário informar um e-mail válido." });
                 }
 
-                // Verifica se o e-mail já está em uso (opcional)
+                // verifica se o e-mail já está em uso (opcional)
                 var emailExistente = _context.Usuarios.Any(u => u.Email == novoUsuario.Email);
                 if (emailExistente)
                 {
                     return BadRequest(new { mensagem = "Este e-mail já está em uso." });
                 }
 
-                // Gera uma senha padrão
-                string senhaPadrao = "123456"; // ou gere dinamicamente
+                // cadastra ja com senha padrao
+                string senhaPadrao = "Condominio123"; 
 
-                // Criptografa a senha (exemplo: hash básico)
+                // hasheia a senha 
                 novoUsuario.Senha = HashHelper.GerarHash(senhaPadrao);
                 novoUsuario.DataCadastro = DateTime.UtcNow;
 
-                // Salva no banco
                 _context.Usuarios.Add(novoUsuario);
                 await _context.SaveChangesAsync();
 
-                // Envia e-mail
+                // envio do e-mail (um por vez com task run)
                 _ = Task.Run(() => _emailService.SendWelcomeEmailAsync(novoUsuario.Email, senhaPadrao));
 
 
@@ -259,7 +254,7 @@ namespace condominio_API.Controllers
             return Ok(new { mensagem = "Usuário atualizado com sucesso." });
         }
 
-        [HttpGet("BuscarPorRFID")]  // rota usada para verificar se a tag esta cadastrada
+        [HttpGet("BuscarPorRFID")]  // rota de verificar se a tag esta cadastrada
         public async Task<IActionResult> BuscarPorRFID([FromQuery] string rfid)
         {
             if (string.IsNullOrWhiteSpace(rfid))
@@ -298,13 +293,13 @@ namespace condominio_API.Controllers
                 return NotFound(new { mensagem = "Usuário não encontrado." });
             }
 
-            // Verificar se a senha atual está correta
+            // ve se a senha atual ta certa (comparacao de hasheada com hasheada)
             if (!HashHelper.VerificarHash(usuario.Senha, request.SenhaAtual))
             {
                 return BadRequest(new { mensagem = "Senha atual incorreta." });
             }
 
-            // Atualizar a senha
+            // altera a senha
             usuario.Senha = HashHelper.GerarHash(request.NovaSenha);
             usuario.IsTemporaryPassword = false;
 

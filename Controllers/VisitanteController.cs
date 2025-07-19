@@ -41,7 +41,22 @@ namespace condominio_API.Controllers
 
             if (!string.IsNullOrWhiteSpace(documento))
             {
-                query = query.Where(v => v.Documento.Contains(documento));
+                var docLimpo = new string(documento.Where(char.IsDigit).ToArray());
+
+                if (docLimpo.Length == 11)
+                {
+                    // CPF
+                    query = query.Where(v => v.Documento == docLimpo);
+                }
+                else if (docLimpo.Length == 14)
+                {
+                    // CNPJ
+                    query = query.Where(v => v.Cnpj == docLimpo);
+                }
+                else
+                {
+                    return BadRequest(new { mensagem = "Documento inválido! Informe um CPF (11 dígitos) ou CNPJ (14 dígitos)." });
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(telefone))
@@ -52,7 +67,6 @@ namespace condominio_API.Controllers
             if (status.HasValue)
             {
                 query = query.Where(v => v.Status == status.Value);
-
             }
 
             if (prestadorServico.HasValue)
@@ -69,6 +83,7 @@ namespace condominio_API.Controllers
 
             return Ok(visitantes);
         }
+
 
 
         [HttpPost("CadastrarVisitante")]

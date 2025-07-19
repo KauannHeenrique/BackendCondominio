@@ -1,10 +1,11 @@
 ﻿using condominio_API.Models;
 using OfficeOpenXml;
 using System.Globalization;
+using System.Linq;
 
 public static class GeradorRelatorio
 {
-    // ========= USUÁRIOS =========
+    // ====================== USUÁRIOS ======================
     public static byte[] GerarRelatorioUsuarios(List<Usuario> usuarios)
     {
         using var package = new ExcelPackage();
@@ -40,7 +41,7 @@ public static class GeradorRelatorio
         sheet.Cells.AutoFitColumns();
     }
 
-    // ========= VISITANTES =========
+    // ====================== VISITANTES ======================
     public static byte[] GerarRelatorioVisitantes(List<Visitante> visitantes)
     {
         using var package = new ExcelPackage();
@@ -72,7 +73,7 @@ public static class GeradorRelatorio
         sheet.Cells.AutoFitColumns();
     }
 
-    // ========= APARTAMENTOS =========
+    // ====================== APARTAMENTOS ======================
     public static byte[] GerarRelatorioApartamentos(List<Apartamento> apartamentos)
     {
         using var package = new ExcelPackage();
@@ -104,7 +105,7 @@ public static class GeradorRelatorio
         sheet.Cells.AutoFitColumns();
     }
 
-    // ========= ENTRADAS MORADOR =========
+    // ====================== ENTRADAS MORADOR ======================
     public static byte[] GerarRelatorioEntradasMorador(List<AcessoEntradaMorador> entradas)
     {
         using var package = new ExcelPackage();
@@ -128,7 +129,7 @@ public static class GeradorRelatorio
             sheet.Cells[i + 2, 1].Value = e.Id;
             sheet.Cells[i + 2, 2].Value = e.Usuario?.Nome ?? "Desconhecido";
             sheet.Cells[i + 2, 3].Value = e.DataHoraEntrada.ToString("dd/MM/yyyy HH:mm");
-            sheet.Cells[i + 2, 3].Value = e.EntradaPor == "1" ? "TAG" :
+            sheet.Cells[i + 2, 4].Value = e.EntradaPor == "1" ? "TAG" :
                                            e.EntradaPor == "2" ? "Manual" : "Desconhecido";
             sheet.Cells[i + 2, 5].Value = e.Observacao;
             sheet.Cells[i + 2, 6].Value = e.RegistradoPor;
@@ -137,7 +138,7 @@ public static class GeradorRelatorio
         sheet.Cells.AutoFitColumns();
     }
 
-    // ========= ENTRADAS VISITANTE =========
+    // ====================== ENTRADAS VISITANTE ======================
     public static byte[] GerarRelatorioEntradasVisitante(List<AcessoEntradaVisitante> entradas)
     {
         using var package = new ExcelPackage();
@@ -167,7 +168,7 @@ public static class GeradorRelatorio
         sheet.Cells.AutoFitColumns();
     }
 
-    // ========= NOTIFICAÇÕES =========
+    // ====================== NOTIFICAÇÕES ======================
     public static byte[] GerarRelatorioNotificacoes(List<Notificacao> notificacoes)
     {
         using var package = new ExcelPackage();
@@ -185,7 +186,7 @@ public static class GeradorRelatorio
         sheet.Cells[1, 5].Value = "Status";
         sheet.Cells[1, 6].Value = "Data Criação";
         sheet.Cells[1, 7].Value = "Origem";
-        sheet.Cells[1, 8].Value = "Destino";
+        sheet.Cells[1, 8].Value = "Destinos";
 
         for (int i = 0; i < notificacoes.Count; i++)
         {
@@ -197,9 +198,14 @@ public static class GeradorRelatorio
             sheet.Cells[i + 2, 5].Value = n.Status.ToString();
             sheet.Cells[i + 2, 6].Value = n.DataCriacao.ToString("dd/MM/yyyy HH:mm");
             sheet.Cells[i + 2, 7].Value = n.MoradorOrigem?.Nome ?? "Desconhecido";
-            sheet.Cells[i + 2, 8].Value = n.ApartamentoDestino != null
-                ? $"{n.ApartamentoDestino.Bloco}-{n.ApartamentoDestino.Numero}"
-                : "-";
+
+            // ✅ Monta a lista de destinos com Bloco-Número
+            var destinos = n.Destinatarios
+                .Where(d => d.UsuarioDestino?.Apartamento != null)
+                .Select(d => $"{d.UsuarioDestino.Apartamento.Bloco}-{d.UsuarioDestino.Apartamento.Numero}")
+                .ToList();
+
+            sheet.Cells[i + 2, 8].Value = destinos.Any() ? string.Join(", ", destinos) : "-";
         }
 
         sheet.Cells.AutoFitColumns();

@@ -57,6 +57,11 @@
         "Name": "dataFim",
         "Type": "System.Nullable\u00601[[System.DateTime, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "IsRequired": false
+      },
+      {
+        "Name": "apartamentoId",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []
@@ -353,10 +358,52 @@
     ]
   },
   {
-    "ContainingType": "condominio_API.Controllers.NotificacaoController",
-    "Method": "Aprovar",
-    "RelativePath": "api/Notificacao/Aprovar/{id}",
+    "ContainingType": "condominio_API.Controllers.AtividadesController",
+    "Method": "GetAtividadesRecentes",
+    "RelativePath": "api/Atividades/Recentes/{usuarioId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "usuarioId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "limite",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "NotificacaoController",
+    "Method": "AtualizarNotificacao",
+    "RelativePath": "api/Notificacao/{id}/atualizar",
     "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "AtualizarNotificacaoRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "NotificacaoController",
+    "Method": "DetalhesNotificacao",
+    "RelativePath": "api/Notificacao/{id}/detalhes",
+    "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
@@ -369,25 +416,9 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "condominio_API.Controllers.NotificacaoController",
-    "Method": "CriarNotificacao",
-    "RelativePath": "api/Notificacao/CriarNotificacao",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "nova",
-        "Type": "condominio_API.Models.Notificacao",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "condominio_API.Controllers.NotificacaoController",
-    "Method": "GetMinhasNotificacoes",
-    "RelativePath": "api/Notificacao/MinhasNotificacoes/{usuarioId}",
+    "ContainingType": "NotificacaoController",
+    "Method": "GetAlertasAtivos",
+    "RelativePath": "api/Notificacao/AlertasAtivos/{usuarioId}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -401,48 +432,79 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "condominio_API.Controllers.NotificacaoController",
-    "Method": "GetPendentes",
-    "RelativePath": "api/Notificacao/PendentesParaAprovacao",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "condominio_API.Controllers.NotificacaoController",
-    "Method": "GetRecebidas",
-    "RelativePath": "api/Notificacao/Recebidas/{apartamentoId}",
-    "HttpMethod": "GET",
+    "ContainingType": "NotificacaoController",
+    "Method": "CriarNotificacao",
+    "RelativePath": "api/Notificacao/CriarNotificacao",
+    "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "apartamentoId",
-        "Type": "System.Int32",
+        "Name": "request",
+        "Type": "CriarNotificacaoRequest",
         "IsRequired": true
       }
     ],
     "ReturnTypes": []
   },
   {
-    "ContainingType": "condominio_API.Controllers.NotificacaoController",
-    "Method": "Rejeitar",
-    "RelativePath": "api/Notificacao/Rejeitar/{id}",
-    "HttpMethod": "PUT",
+    "ContainingType": "NotificacaoController",
+    "Method": "MinhasNotificacoes",
+    "RelativePath": "api/Notificacao/MinhasNotificacoes/{usuarioId}",
+    "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "id",
+        "Name": "usuarioId",
         "Type": "System.Int32",
         "IsRequired": true
       },
       {
-        "Name": "comentario",
-        "Type": "System.String",
+        "Name": "page",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "criadoPorSindico",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "NotificacaoController",
+    "Method": "Recebidas",
+    "RelativePath": "api/Notificacao/Recebidas/{usuarioId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "usuarioId",
+        "Type": "System.Int32",
         "IsRequired": true
+      },
+      {
+        "Name": "page",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "criadoPorSindico",
+        "Type": "System.Boolean",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []

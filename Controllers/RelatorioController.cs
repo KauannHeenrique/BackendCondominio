@@ -81,7 +81,7 @@ namespace condominio_API.Controllers
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         $"Relatorio_Notificacoes_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
-
+        
         [HttpPost("multiplos")]
         public async Task<IActionResult> GerarRelatoriosSelecionados([FromBody] RelatorioMultiploRequest selecao)
         {
@@ -135,6 +135,5 @@ namespace condominio_API.Controllers
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 $"Relatorios_Selecionados_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
-
     }
 }

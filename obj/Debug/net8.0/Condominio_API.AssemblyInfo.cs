@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Condominio_API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+74b582615e042658ceadb5192f10bc1ddafc28b9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fce7862966b199cc0c8544d9382fdef0bab03679")]
 [assembly: System.Reflection.AssemblyProductAttribute("Condominio_API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Condominio_API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

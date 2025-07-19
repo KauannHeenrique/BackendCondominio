@@ -1,7 +1,5 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using condominio_API.Models;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
-
 
 namespace condominio_API.Data
 {
@@ -15,9 +13,14 @@ namespace condominio_API.Data
         public DbSet<AcessoEntradaVisitante> AcessoEntradaVisitantes { get; set; }
         public DbSet<Apartamento> Apartamentos { get; set; }
         public DbSet<Notificacao> Notificacoes { get; set; }
+        public DbSet<NotificacaoDestinatario> NotificacaoDestinatarios { get; set; } // ✅ Novo
         public DbSet<QRCodeTemp> QRCodesTemp { get; set; }
         public DbSet<Visitante> Visitantes { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<NotificacaoHistorico> NotificacaoHistoricos { get; set; }
+        public DbSet<AtividadeView> AtividadesRecentes { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -43,10 +46,19 @@ namespace condominio_API.Data
                 .WithMany()
                 .HasForeignKey(n => n.MoradorOrigemId);
 
+            // ✅ Relacionamento Notificação -> Destinatários
             modelBuilder.Entity<Notificacao>()
-                .HasOne(n => n.ApartamentoDestino)
+                .HasMany(n => n.Destinatarios)
+                .WithOne(d => d.Notificacao)
+                .HasForeignKey(d => d.NotificacaoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ✅ Relacionamento Destinatário -> Usuário
+            modelBuilder.Entity<NotificacaoDestinatario>()
+                .HasOne(d => d.UsuarioDestino)
                 .WithMany()
-                .HasForeignKey(n => n.ApartamentoDestinoId);
+                .HasForeignKey(d => d.UsuarioDestinoId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<QRCodeTemp>()
                 .HasOne(q => q.Morador)
@@ -64,8 +76,23 @@ namespace condominio_API.Data
                 .HasOne(u => u.Apartamento)
                 .WithMany()
                 .HasForeignKey(u => u.ApartamentoId)
-                .IsRequired(false);  // falso para poder cadastrar funcionarios com idapartartamento vazio
+                .IsRequired(false);  // falso para poder cadastrar funcionarios com idapartamento vazio
 
+            modelBuilder.Entity<Notificacao>()
+                .HasMany(n => n.Historico)
+                .WithOne(h => h.Notificacao)
+                .HasForeignKey(h => h.NotificacaoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<NotificacaoHistorico>()
+                .HasOne(h => h.Usuario)
+                .WithMany()
+                .HasForeignKey(h => h.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AtividadeView>()
+                .HasNoKey() // Views não têm chave primária
+                .ToView("vw_atividades_recentes"); // Nome exato da sua VIEW no MySQL
 
             base.OnModelCreating(modelBuilder);
         }

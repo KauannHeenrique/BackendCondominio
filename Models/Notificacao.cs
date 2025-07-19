@@ -8,7 +8,8 @@ namespace condominio_API.Models
         Pendente = 1,
         Aprovada = 2,
         Rejeitada = 3,
-        EmAndamento = 4
+        EmAndamento = 4,
+        Concluida = 5
     }
 
     public enum TipoNotificacao
@@ -16,8 +17,10 @@ namespace condominio_API.Models
         AvisoDeBarulho = 1,
         SolicitacaoDeReparo = 2,
         Sugestao = 3,
-        Outro = 4
+        Outro = 4,
+        ComunicadoGeral = 5 
     }
+
 
     public class Notificacao
     {
@@ -28,12 +31,10 @@ namespace condominio_API.Models
         [Required]
         public TipoNotificacao Tipo { get; set; }
 
-        [Required]
-        [MaxLength(100)]
+        [Required, MaxLength(100)]
         public string Titulo { get; set; } = string.Empty;
 
-        [Required]
-        [MaxLength(1000)]
+        [Required, MaxLength(1000)]
         public string Mensagem { get; set; } = string.Empty;
 
         [Required]
@@ -41,22 +42,23 @@ namespace condominio_API.Models
 
         public string? ComentarioSindico { get; set; }
 
-        [Required]
         public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
 
         public DateTime? UltimaAtualizacao { get; set; }
 
-        // Morador que criou a notificação
         [Required]
         public int MoradorOrigemId { get; set; }
-
-        [ForeignKey("MoradorOrigemId")]
         public Usuario? MoradorOrigem { get; set; }
 
-        // Morador de destino (opcional)
-        public int? ApartamentoDestinoId { get; set; }
+        public bool CriadoPorSindico { get; set; } = false;
 
-        [ForeignKey("ApartamentoDestinoId")]
-        public Apartamento? ApartamentoDestino { get; set; }
+        // Relacionamento com destinatários
+        public ICollection<NotificacaoDestinatario> Destinatarios { get; set; } = new List<NotificacaoDestinatario>();
+
+        // ✅ Novo: Histórico da Notificação
+        public ICollection<NotificacaoHistorico> Historico { get; set; } = new List<NotificacaoHistorico>();
+
     }
+
+
 }

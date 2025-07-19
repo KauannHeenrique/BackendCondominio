@@ -55,9 +55,12 @@ namespace condominio_API.Services
         {
             return await _context.Notificacoes
                 .Include(n => n.MoradorOrigem)
-                .Include(n => n.ApartamentoDestino)
+                .Include(n => n.Destinatarios)
+                    .ThenInclude(d => d.UsuarioDestino)
+                        .ThenInclude(u => u.Apartamento)
                 .OrderByDescending(n => n.DataCriacao)
                 .ToListAsync();
         }
+
     }
 }

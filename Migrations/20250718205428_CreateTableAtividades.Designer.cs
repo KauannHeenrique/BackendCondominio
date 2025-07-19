@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using condominio_API.Data;
 
@@ -11,9 +12,11 @@ using condominio_API.Data;
 namespace Condominio_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250718205428_CreateTableAtividades")]
+    partial class CreateTableAtividades
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -111,8 +114,14 @@ namespace Condominio_API.Migrations
                     b.ToTable("Apartamentos");
                 });
 
-            modelBuilder.Entity("condominio_API.Models.AtividadeView", b =>
+            modelBuilder.Entity("condominio_API.Models.Atividades", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<DateTime>("DataRegistro")
                         .HasColumnType("datetime(6)");
 
@@ -131,9 +140,9 @@ namespace Condominio_API.Migrations
                     b.Property<int>("UsuarioId")
                         .HasColumnType("int");
 
-                    b.ToTable((string)null);
+                    b.HasKey("Id");
 
-                    b.ToView("vw_atividades_recentes", (string)null);
+                    b.ToTable("Atividades");
                 });
 
             modelBuilder.Entity("condominio_API.Models.Notificacao", b =>

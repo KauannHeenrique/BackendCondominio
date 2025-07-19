@@ -14,7 +14,7 @@ namespace condominio_API.Services
             _emailSettings = emailSettings.Value;
         }
 
-        // metodo que vai enviar o email de resetar de senha
+        // metodo que vai enviar o email de resetar senha
         public async Task SendResetPasswordEmailAsync(string toEmail, string senhaPadrao)
         {
             // mensagem de e-mail 
@@ -23,7 +23,6 @@ namespace condominio_API.Services
             message.To.Add(new MailboxAddress("", toEmail));
             message.Subject = "Alteração de senha bem-sucedida!";
 
-            // e-mail em HTML
             var bodyBuilder = new BodyBuilder
             {
                 HtmlBody = $@"
