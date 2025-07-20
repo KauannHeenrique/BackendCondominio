@@ -3,9 +3,6 @@ using condominio_API.Data;
 using condominio_API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace condominio_API.Controllers
 {
@@ -20,6 +17,7 @@ namespace condominio_API.Controllers
             _context = context;
         }
 
+        // ✅ Registrar entrada (QR Code ou Manual)
         [HttpPost("RegistrarEntradaVisitante")]
         public async Task<IActionResult> RegistrarEntradaVisitante([FromBody] EntradaVisitanteRequest request)
         {
@@ -27,11 +25,8 @@ namespace condominio_API.Controllers
             {
                 if (!string.IsNullOrWhiteSpace(request.QrCodeData))
                 {
-                    // Fluxo de QR Code
                     return await RegistrarEntradaPorQrCode(request);
                 }
-
-                // Fluxo Manual
                 return await RegistrarEntradaManual(request);
             }
             catch (Exception ex)
@@ -40,14 +35,9 @@ namespace condominio_API.Controllers
             }
         }
 
-        // ✅ Fluxo de QR Code
+        // ✅ Fluxo QR Code
         private async Task<IActionResult> RegistrarEntradaPorQrCode(EntradaVisitanteRequest request)
         {
-            if (string.IsNullOrEmpty(request.QrCodeData))
-            {
-                return BadRequest(new { mensagem = "O QR code é obrigatório!" });
-            }
-
             var qrCode = await _context.QRCodesTemp!
                 .Include(q => q.Visitante)
                 .Include(q => q.Morador)
@@ -57,9 +47,7 @@ namespace condominio_API.Controllers
                                         && q.DataValidade > DateTime.Now);
 
             if (qrCode == null)
-            {
                 return BadRequest(new { mensagem = "QR code inválido, expirado ou não encontrado!" });
-            }
 
             var novaEntrada = new AcessoEntradaVisitante
             {
@@ -71,9 +59,7 @@ namespace condominio_API.Controllers
             };
 
             if (!qrCode.TipoQRCode)
-            {
                 qrCode.Status = false; // QR code usado não pode ser reutilizado
-            }
 
             _context.AcessoEntradaVisitantes.Add(novaEntrada);
             await _context.SaveChangesAsync();
@@ -105,19 +91,14 @@ namespace condominio_API.Controllers
                 return BadRequest(new { mensagem = "Informe visitante, bloco, apartamento e CPF do morador." });
             }
 
-            // Busca visitante
             var visitante = await _context.Visitantes.FindAsync(request.VisitanteId);
             if (visitante == null)
                 return NotFound(new { mensagem = "Visitante não encontrado." });
 
-            // Limpar CPF (somente números)
             var cpfLimpo = new string(request.CpfMorador.Where(char.IsDigit).ToArray());
 
-            int numeroApartamento;
-            if (!int.TryParse(request.Apartamento, out numeroApartamento))
-            {
+            if (!int.TryParse(request.Apartamento, out int numeroApartamento))
                 return BadRequest(new { mensagem = "Número do apartamento inválido." });
-            }
 
             var usuario = await _context.Usuarios
                 .Include(u => u.Apartamento)
@@ -126,11 +107,9 @@ namespace condominio_API.Controllers
                     u.Apartamento.Bloco == request.Bloco &&
                     u.Apartamento.Numero == numeroApartamento);
 
-
             if (usuario == null)
                 return NotFound(new { mensagem = "Morador não encontrado para o bloco, apartamento e CPF informados." });
 
-            // Registrar entrada manual
             var entrada = new AcessoEntradaVisitante
             {
                 VisitanteId = request.VisitanteId.Value,
@@ -147,7 +126,7 @@ namespace condominio_API.Controllers
             return Ok(new { mensagem = "Entrada manual registrada com sucesso!" });
         }
 
-        // ✅ Listar Entradas
+        // ✅ Listar todas as entradas
         [HttpGet("ListarEntradasVisitantes")]
         public async Task<ActionResult> ListarEntradasVisitantes()
         {
@@ -159,15 +138,50 @@ namespace condominio_API.Controllers
                 .Select(e => new
                 {
                     id = e.Id,
-                    idVisitante = e.VisitanteId,
                     nomeVisitante = e.Visitante!.Nome,
-                    documentoVisitante = e.Visitante!.Documento,
-                    idMorador = e.UsuarioId,
                     nomeMorador = e.Usuario!.Nome,
-                    idApartamento = e.Usuario!.ApartamentoId,
                     apartamento = e.Usuario!.Apartamento!.Numero,
                     bloco = e.Usuario!.Apartamento!.Bloco,
                     dataEntrada = e.DataHoraEntrada,
+                    entradaPor = e.EntradaPor
+                })
+                .ToListAsync();
+
+            return Ok(entradas);
+        }
+
+        // ✅ NOVO: Filtrar por ApartamentoId + Data
+        [HttpGet("FiltrarEntradasPorApartamento")]
+        public async Task<ActionResult> FiltrarEntradasPorApartamento(
+            [FromQuery] int apartamentoId,
+            [FromQuery] DateTime? dataInicio = null,
+            [FromQuery] DateTime? dataFim = null)
+        {
+            if (apartamentoId <= 0)
+                return BadRequest(new { mensagem = "O ID do apartamento é obrigatório e deve ser válido!" });
+
+            var query = _context.AcessoEntradaVisitantes!
+                .Include(e => e.Visitante)
+                .Include(e => e.Usuario)
+                    .ThenInclude(u => u.Apartamento)
+                .Where(e => e.Usuario!.ApartamentoId == apartamentoId);
+
+            if (dataInicio.HasValue)
+                query = query.Where(e => e.DataHoraEntrada >= dataInicio.Value);
+
+            if (dataFim.HasValue)
+                query = query.Where(e => e.DataHoraEntrada <= dataFim.Value);
+
+            var entradas = await query
+                .OrderByDescending(e => e.DataHoraEntrada)
+                .Select(e => new
+                {
+                    id = e.Id,
+                    nomeVisitante = e.Visitante!.Nome,
+                    nomeMorador = e.Usuario!.Nome,
+                    apartamento = e.Usuario!.Apartamento!.Numero,
+                    bloco = e.Usuario!.Apartamento!.Bloco,
+                    dataHoraEntrada = e.DataHoraEntrada,
                     entradaPor = e.EntradaPor
                 })
                 .ToListAsync();

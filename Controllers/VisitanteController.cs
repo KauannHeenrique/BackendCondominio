@@ -26,12 +26,23 @@ namespace condominio_API.Controllers
 
         [HttpGet("BuscarVisitantePor")]
         public async Task<ActionResult<IEnumerable<Visitante>>> GetVisitante(
+    [FromQuery] int? id,
     [FromQuery] string? nomeVisitante,
     [FromQuery] string? documento,
     [FromQuery] string? telefone,
     [FromQuery] bool? status,
     [FromQuery] bool? prestadorServico)
         {
+            //Se ID for informado, ignora os outros filtros e retorna apenas esse visitante
+            if (id.HasValue)
+            {
+                var visitante = await _context.Visitantes.FirstOrDefaultAsync(v => v.VisitanteId == id.Value);
+                if (visitante == null)
+                    return NotFound(new { mensagem = "Visitante não encontrado." });
+
+                return Ok(visitante); // Retorna apenas um objeto, não uma lista
+            }
+
             var query = _context.Visitantes.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(nomeVisitante))

@@ -30,11 +30,14 @@ namespace condominio_API.Controllers
 
 
         [HttpGet("ExibirTodosUsuarios")]
-
         public async Task<ActionResult<IEnumerable<Usuario>>> GetTodosUsuarios()
         {
-            return await _context.Usuarios.Include(user => user.Apartamento).ToListAsync();
+            return await _context.Usuarios
+                .Include(user => user.Apartamento)
+                .Where(u => u.NivelAcesso != (NivelAcessoEnum)1) // Remove Administrador
+                .ToListAsync();
         }
+
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] AuthRequest request)
@@ -113,8 +116,9 @@ namespace condominio_API.Controllers
     [FromQuery] bool? status)
         {
             var query = _context.Usuarios
-                .Include(u => u.Apartamento)
-                .AsQueryable();
+            .Include(u => u.Apartamento)
+            .Where(u => u.NivelAcesso != (NivelAcessoEnum)1 ) // Excluir administrador
+            .AsQueryable();
 
             if (id.HasValue)
                 query = query.Where(user => user.UsuarioId == id.Value);

@@ -257,6 +257,44 @@
         }
       }
     },
+    "/api/AcessoEntradaVisitante/FiltrarEntradasPorApartamento": {
+      "get": {
+        "tags": [
+          "AcessoEntradaVisitante"
+        ],
+        "parameters": [
+          {
+            "name": "apartamentoId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "dataInicio",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "dataFim",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Apartamento/ExibirTodosApartamentos": {
       "get": {
         "tags": [
@@ -1432,6 +1470,14 @@
           "Visitante"
         ],
         "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
           {
             "name": "nomeVisitante",
             "in": "query",

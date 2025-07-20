@@ -24,14 +24,15 @@ namespace condominio_API.Controllers
             return await _context.Apartamentos.ToListAsync();
         }
 
-        [HttpGet("BuscarApartamentoPor")]   
+        [HttpGet("BuscarApartamentoPor")]
         public async Task<ActionResult<IEnumerable<Apartamento>>> GetApartamentos([FromQuery] string? bloco, [FromQuery] int? numero, [FromQuery] string? proprietario)
         {
             var query = _context.Apartamentos.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(bloco))
             {
-                query = query.Where(ap => ap.Bloco.Contains(bloco));
+                var blocoUpper = bloco.ToUpper();
+                query = query.Where(ap => ap.Bloco.ToUpper().Contains(blocoUpper));
             }
 
             if (numero.HasValue)
@@ -41,7 +42,8 @@ namespace condominio_API.Controllers
 
             if (!string.IsNullOrWhiteSpace(proprietario))
             {
-                query = query.Where(ap => ap.Proprietario.Contains(proprietario));
+                var proprietarioUpper = proprietario.ToUpper();
+                query = query.Where(ap => ap.Proprietario.ToUpper().Contains(proprietarioUpper));
             }
 
             var apartamentos = await query.ToListAsync();
@@ -53,6 +55,7 @@ namespace condominio_API.Controllers
 
             return Ok(apartamentos);
         }
+
 
         [HttpGet("BuscarApartamentoPorId/{id}")]
         public IActionResult BuscarPorId(int id)
@@ -74,15 +77,18 @@ namespace condominio_API.Controllers
                     return BadRequest(new { mensagem = "Por favor, preencha todos os campos" });
                 }
 
-                var apartamentoFirst = await _context.Apartamentos.FirstOrDefaultAsync(ap => ap.Bloco == novoApartamento.Bloco &&
-                ap.Numero == novoApartamento.Numero);
+                // Converte para maiúsculas antes de salvar
+                novoApartamento.Bloco = novoApartamento.Bloco?.ToUpper();
+
+                var apartamentoFirst = await _context.Apartamentos
+                    .FirstOrDefaultAsync(ap => ap.Bloco.ToUpper() == novoApartamento.Bloco && ap.Numero == novoApartamento.Numero);
 
                 if (apartamentoFirst != null)
                 {
                     return BadRequest(new { mensagem = "Este apartamento já está cadastrado!" });
                 }
 
-                // verifica se a situação do apartamento é válida
+                // Verifica situação
                 if (!Enum.IsDefined(typeof(SituacaoApartamento), novoApartamento.Situacao))
                 {
                     return BadRequest(new { mensagem = "Situação do apartamento inválida." });
@@ -99,6 +105,8 @@ namespace condominio_API.Controllers
             }
         }
 
+
+
         [HttpPut("AtualizarApartamento/{id}")]
         public async Task<IActionResult> PutApartamento(int id, [FromBody] Apartamento apartamento)
         {
@@ -114,9 +122,12 @@ namespace condominio_API.Controllers
                 return NotFound(new { mensagem = "Apartamento não encontrado." });
             }
 
-            // Verifica se jám ap antes de cadastrar - mesmo bloco e número, mas com id diferente
+            // Converte bloco para maiúsculo
+            apartamento.Bloco = apartamento.Bloco?.ToUpper();
+
+            // Verifica duplicidade sem considerar maiúsculas/minúsculas
             var duplicado = await _context.Apartamentos
-                .AnyAsync(a => a.Id != id && a.Bloco == apartamento.Bloco && a.Numero == apartamento.Numero);
+                .AnyAsync(a => a.Id != id && a.Bloco.ToUpper() == apartamento.Bloco && a.Numero == apartamento.Numero);
 
             if (duplicado)
             {
@@ -133,6 +144,7 @@ namespace condominio_API.Controllers
 
             return Ok(new { mensagem = "Apartamento atualizado com sucesso!" });
         }
+
 
 
         [HttpDelete("ExcluirApartamento/{id}")]
