@@ -136,58 +136,6 @@
   },
   {
     "ContainingType": "condominio_API.Controllers.AcessoEntradaVisitanteController",
-    "Method": "FiltrarEntradasVisitantesAdmin",
-    "RelativePath": "api/AcessoEntradaVisitante/FiltrarEntradasVisitantesAdmin",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "documento",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "numero",
-        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
-        "IsRequired": false
-      },
-      {
-        "Name": "bloco",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "dataInicio",
-        "Type": "System.Nullable\u00601[[System.DateTime, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
-        "IsRequired": false
-      },
-      {
-        "Name": "dataFim",
-        "Type": "System.Nullable\u00601[[System.DateTime, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
-        "IsRequired": false
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "condominio_API.Controllers.AcessoEntradaVisitanteController",
-    "Method": "ListarEntradasPorApartamentoDoUsuario",
-    "RelativePath": "api/AcessoEntradaVisitante/ListarEntradasPorApartamentoDoUsuario",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "usuarioId",
-        "Type": "System.Int32",
-        "IsRequired": false
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "condominio_API.Controllers.AcessoEntradaVisitanteController",
     "Method": "ListarEntradasVisitantes",
     "RelativePath": "api/AcessoEntradaVisitante/ListarEntradasVisitantes",
     "HttpMethod": "GET",
@@ -205,22 +153,12 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "entradaVisitanteReq",
-        "Type": "Condominio_API.Requests.EntradaVisitanteRequest",
+        "Name": "request",
+        "Type": "EntradaVisitanteRequest",
         "IsRequired": true
       }
     ],
-    "ReturnTypes": [
-      {
-        "Type": "condominio_API.Models.AcessoEntradaVisitante",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
+    "ReturnTypes": []
   },
   {
     "ContainingType": "condominio_API.Controllers.ApartamentoController",

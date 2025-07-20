@@ -240,24 +240,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/AcessoEntradaVisitante"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AcessoEntradaVisitante"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AcessoEntradaVisitante"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
@@ -266,80 +249,6 @@
       "get": {
         "tags": [
           "AcessoEntradaVisitante"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/AcessoEntradaVisitante/FiltrarEntradasVisitantesAdmin": {
-      "get": {
-        "tags": [
-          "AcessoEntradaVisitante"
-        ],
-        "parameters": [
-          {
-            "name": "documento",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "numero",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "bloco",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "dataInicio",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "dataFim",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/AcessoEntradaVisitante/ListarEntradasPorApartamentoDoUsuario": {
-      "get": {
-        "tags": [
-          "AcessoEntradaVisitante"
-        ],
-        "parameters": [
-          {
-            "name": "usuarioId",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
         ],
         "responses": {
           "200": {
@@ -1749,39 +1658,6 @@
         },
         "additionalProperties": false
       },
-      "AcessoEntradaVisitante": {
-        "required": [
-          "dataHoraEntrada",
-          "usuarioId",
-          "visitanteId"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "visitanteId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "visitante": {
-            "$ref": "#/components/schemas/Visitante"
-          },
-          "usuarioId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "usuario": {
-            "$ref": "#/components/schemas/Usuario"
-          },
-          "dataHoraEntrada": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "additionalProperties": false
-      },
       "AlterarSenhaRequest": {
         "type": "object",
         "properties": {
@@ -1979,14 +1855,36 @@
         "additionalProperties": false
       },
       "EntradaVisitanteRequest": {
-        "required": [
-          "qrCodeData"
-        ],
         "type": "object",
         "properties": {
           "qrCodeData": {
-            "minLength": 1,
-            "type": "string"
+            "type": "string",
+            "nullable": true
+          },
+          "visitanteId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "bloco": {
+            "type": "string",
+            "nullable": true
+          },
+          "apartamento": {
+            "type": "string",
+            "nullable": true
+          },
+          "cpfMorador": {
+            "type": "string",
+            "nullable": true
+          },
+          "observacao": {
+            "type": "string",
+            "nullable": true
+          },
+          "registradoPor": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
