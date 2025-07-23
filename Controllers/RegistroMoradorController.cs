@@ -217,6 +217,61 @@ namespace condominio_API.Controllers
             }
         }
 
+        [HttpGet("AcessosHojeAdmin")]
+        public async Task<IActionResult> GetAcessosHojeAdmin()
+        {
+            try
+            {
+                var hoje = DateTime.Now.Date; // 00:00 do dia atual
+                var amanha = hoje.AddDays(1).AddTicks(-1); // 23:59:59 do dia atual
+
+                // ✅ Log do intervalo
+                Console.WriteLine($"[DEBUG] Intervalo de hoje: {hoje} até {amanha}");
+
+                // ✅ Log dos primeiros registros no banco
+                var registros = await _context.AcessoEntradaMoradores
+                    .OrderByDescending(e => e.DataHoraEntrada)
+                    .Select(e => new { e.Id, e.DataHoraEntrada })
+                    .Take(5)
+                    .ToListAsync();
+
+                Console.WriteLine("[DEBUG] Primeiros registros no banco:");
+                foreach (var r in registros)
+                {
+                    Console.WriteLine($"ID: {r.Id}, Data: {r.DataHoraEntrada}");
+                }
+
+                // ✅ Query original
+                var acessosHoje = await _context.AcessoEntradaMoradores
+                    .Include(e => e.Usuario)
+                        .ThenInclude(u => u.Apartamento)
+                    .Where(e => e.DataHoraEntrada >= hoje && e.DataHoraEntrada <= amanha)
+                    .OrderByDescending(e => e.DataHoraEntrada)
+                    .Select(e => new
+                    {
+                        e.Id,
+                        e.UsuarioId,
+                        Nome = e.Usuario!.Nome,
+                        e.Usuario!.ApartamentoId,
+                        Apartamento = e.Usuario!.Apartamento != null ? (int?)e.Usuario.Apartamento.Numero : null,
+                        Bloco = e.Usuario!.Apartamento != null ? e.Usuario.Apartamento.Bloco : null,
+                        NivelAcesso = e.Usuario!.NivelAcesso.ToString(),
+                        e.DataHoraEntrada,
+                        EntradaPor = e.EntradaPor
+                    })
+                    .ToListAsync();
+
+                Console.WriteLine($"[DEBUG] Total encontrado hoje: {acessosHoje.Count}");
+
+                return Ok(acessosHoje);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensagem = "Erro ao buscar acessos de hoje!", detalhes = ex.Message });
+            }
+        }
+
+
 
 
         [HttpGet("FiltrarEntradasUsuario")]

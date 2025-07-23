@@ -1,6 +1,16 @@
 [
   {
     "ContainingType": "condominio_API.Controllers.AcessoEntradaMoradorController",
+    "Method": "GetAcessosHojeAdmin",
+    "RelativePath": "api/AcessoEntradaMorador/AcessosHojeAdmin",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "condominio_API.Controllers.AcessoEntradaMoradorController",
     "Method": "BuscarEntradaPorId",
     "RelativePath": "api/AcessoEntradaMorador/BuscarEntradaPorId",
     "HttpMethod": "GET",
@@ -393,6 +403,16 @@
         "IsRequired": true
       }
     ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "NotificacaoController",
+    "Method": "GetTodosAlertasAtivos",
+    "RelativePath": "api/Notificacao/AlertasAtivosAdmin",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   },
   {

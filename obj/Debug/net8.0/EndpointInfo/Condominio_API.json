@@ -139,6 +139,18 @@
         }
       }
     },
+    "/api/AcessoEntradaMorador/AcessosHojeAdmin": {
+      "get": {
+        "tags": [
+          "AcessoEntradaMorador"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/AcessoEntradaMorador/FiltrarEntradasUsuario": {
       "get": {
         "tags": [
@@ -749,6 +761,18 @@
               "format": "int32"
             }
           }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Notificacao/AlertasAtivosAdmin": {
+      "get": {
+        "tags": [
+          "Notificacao"
         ],
         "responses": {
           "200": {

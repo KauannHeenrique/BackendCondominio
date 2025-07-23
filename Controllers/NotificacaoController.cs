@@ -289,6 +289,32 @@ public class NotificacaoController : ControllerBase
         }
     }
 
+    [HttpGet("AlertasAtivosAdmin")]
+    public async Task<IActionResult> GetTodosAlertasAtivos()
+    {
+        try
+        {
+            var alertasAtivos = await _context.Notificacoes
+                .Where(n => n.Status == StatusNotificacao.Aprovada || n.Status == StatusNotificacao.EmAndamento)
+                .Select(n => new
+                {
+                    n.Id,
+                    n.Titulo,
+                    n.Mensagem,
+                    n.Status,
+                    n.Tipo,
+                    n.DataCriacao,
+                    n.UltimaAtualizacao
+                })
+                .ToListAsync();
+
+            return Ok(alertasAtivos);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Erro ao buscar alertas ativos: {ex.Message}");
+        }
+    }
 
 
 
