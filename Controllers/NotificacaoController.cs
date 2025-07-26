@@ -324,6 +324,7 @@ public class NotificacaoController : ControllerBase
     {
         var notificacao = await _context.Notificacoes
             .Include(n => n.MoradorOrigem)
+                .ThenInclude(m => m.Apartamento) // Inclui os dados do apartamento
             .Include(n => n.Destinatarios)
                 .ThenInclude(d => d.UsuarioDestino)
             .Include(n => n.Historico)
@@ -345,7 +346,9 @@ public class NotificacaoController : ControllerBase
             MoradorOrigem = notificacao.MoradorOrigem != null ? new
             {
                 notificacao.MoradorOrigem.UsuarioId,
-                notificacao.MoradorOrigem.Nome
+                notificacao.MoradorOrigem.Nome,
+                Bloco = notificacao.MoradorOrigem.Apartamento?.Bloco,
+                Apartamento = notificacao.MoradorOrigem.Apartamento?.Numero
             } : null,
             Destinatarios = notificacao.Destinatarios.Select(d => new
             {
@@ -357,12 +360,14 @@ public class NotificacaoController : ControllerBase
             {
                 h.Acao,
                 h.StatusNovo,
-                h.DataRegistro
+                h.DataRegistro,
+                h.Comentario
             })
         };
 
         return Ok(dto);
     }
+
 
 
     /// ✅ Helper para pegar ID do usuário logado

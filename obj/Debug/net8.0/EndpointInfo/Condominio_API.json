@@ -1826,6 +1826,9 @@
           },
           "status": {
             "type": "boolean"
+          },
+          "nivelAcesso": {
+            "$ref": "#/components/schemas/NivelAcessoEnum"
           }
         },
         "additionalProperties": false

@@ -1,4 +1,6 @@
-﻿public class AtualizarUsuarioRequest
+﻿using condominio_API.Models;
+
+public class AtualizarUsuarioRequest
 {
     public string? Nome { get; set; }
     public string? Documento { get; set; }
@@ -7,4 +9,6 @@
     public int? ApartamentoId { get; set; }
     public string? CodigoRFID { get; set; }
     public bool Status { get; set; }
+    public NivelAcessoEnum? NivelAcesso { get; set; }
+
 }

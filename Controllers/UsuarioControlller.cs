@@ -162,32 +162,45 @@ namespace condominio_API.Controllers
                     return BadRequest(new { mensagem = "É necessário informar um e-mail válido." });
                 }
 
-                // verifica se o e-mail já está em uso (opcional)
-                var emailExistente = _context.Usuarios.Any(u => u.Email == novoUsuario.Email);
-                if (emailExistente)
+                if (string.IsNullOrWhiteSpace(novoUsuario.Documento))
                 {
-                    return BadRequest(new { mensagem = "Este e-mail já está em uso." });
+                    return BadRequest(new { mensagem = "É necessário informar um documento (CPF)." });
                 }
 
-                // cadastra ja com senha padrao
-                string senhaPadrao = "Condominio123"; 
+                // Normaliza e-mail e documento
+                var emailNormalizado = novoUsuario.Email.Trim().ToLower();
+                var documentoNormalizado = novoUsuario.Documento.Trim();
 
-                // hasheia a senha 
+                // Verifica se o e-mail já está em uso
+                var emailExistente = _context.Usuarios.Any(u => u.Email.ToLower() == emailNormalizado);
+                if (emailExistente)
+                {
+                    return BadRequest(new { mensagem = "E-mail já cadastrado." });
+                }
+
+                // Verifica se o documento (CPF) já está em uso
+                var documentoExistente = _context.Usuarios.Any(u => u.Documento == documentoNormalizado);
+                if (documentoExistente)
+                {
+                    return BadRequest(new { mensagem = "Documento (CPF) cadastrado." });
+                }
+
+                // Define senha padrão
+                string senhaPadrao = "Condominio123";
                 novoUsuario.Senha = HashHelper.GerarHash(senhaPadrao);
                 novoUsuario.DataCadastro = DateTime.UtcNow;
 
                 _context.Usuarios.Add(novoUsuario);
                 await _context.SaveChangesAsync();
 
-                // envio do e-mail (um por vez com task run)
+                // Envia e-mail de boas-vindas de forma assíncrona
                 _ = Task.Run(() => _emailService.SendWelcomeEmailAsync(novoUsuario.Email, senhaPadrao));
-
 
                 return Ok(new { mensagem = "Usuário cadastrado com sucesso." });
             }
             catch (ArgumentNullException ex)
             {
-                return BadRequest(new { mensagem = "Erro: e-mail não informado corretamente.", detalhes = ex.Message });
+                return BadRequest(new { mensagem = "Erro: dados obrigatórios não informados corretamente.", detalhes = ex.Message });
             }
             catch (Exception ex)
             {
@@ -196,67 +209,111 @@ namespace condominio_API.Controllers
         }
 
 
+
         [HttpPut("AtualizarUsuario/{id}")]
         public async Task<IActionResult> PutUsuario(int id, [FromBody] AtualizarUsuarioRequest usuario)
         {
             if (id <= 0)
-            {
                 return BadRequest("Usuário inválido.");
-            }
 
             var usuarioTemp = await _context.Usuarios.FindAsync(id);
-
             if (usuarioTemp == null)
+                return NotFound(new { mensagem = "Usuário não encontrado." });
+
+            // ✅ Verificar duplicidade de CPF
+            if (!string.IsNullOrEmpty(usuario.Documento) && usuario.Documento != "string" && usuarioTemp.Documento != usuario.Documento)
             {
-                return NotFound();
+                bool cpfExistente = await _context.Usuarios
+                    .AnyAsync(u => u.Documento == usuario.Documento && u.UsuarioId != id);
+
+                if (cpfExistente)
+                    return BadRequest(new { mensagem = "Já existe um usuário cadastrado com este CPF." });
             }
 
+            // ✅ Verificar duplicidade de Email
+            if (!string.IsNullOrEmpty(usuario.Email) && usuario.Email != "string" && usuarioTemp.Email != usuario.Email)
+            {
+                bool emailExistente = await _context.Usuarios
+                    .AnyAsync(u => u.Email == usuario.Email && u.UsuarioId != id);
+
+                if (emailExistente)
+                    return BadRequest(new { mensagem = "Já existe um usuário cadastrado com este e-mail." });
+            }
+
+            // ✅ Nome
             if (!string.IsNullOrEmpty(usuario.Nome) && usuario.Nome != "string" && usuarioTemp.Nome != usuario.Nome)
             {
                 usuarioTemp.Nome = usuario.Nome;
-                _context.Entry(usuarioTemp).Property(user => user.Nome).IsModified = true;
+                _context.Entry(usuarioTemp).Property(u => u.Nome).IsModified = true;
             }
 
+            // ✅ Documento
             if (!string.IsNullOrEmpty(usuario.Documento) && usuario.Documento != "string" && usuarioTemp.Documento != usuario.Documento)
             {
                 usuarioTemp.Documento = usuario.Documento;
-                _context.Entry(usuarioTemp).Property(user => user.Documento).IsModified = true;
+                _context.Entry(usuarioTemp).Property(u => u.Documento).IsModified = true;
             }
 
+            // ✅ Email
             if (!string.IsNullOrEmpty(usuario.Email) && usuario.Email != "string" && usuarioTemp.Email != usuario.Email)
             {
                 usuarioTemp.Email = usuario.Email;
-                _context.Entry(usuarioTemp).Property(user => user.Email).IsModified = true;
+                _context.Entry(usuarioTemp).Property(u => u.Email).IsModified = true;
             }
 
+            // ✅ Telefone
             if (!string.IsNullOrEmpty(usuario.Telefone) && usuario.Telefone != "string" && usuarioTemp.Telefone != usuario.Telefone)
             {
                 usuarioTemp.Telefone = usuario.Telefone;
-                _context.Entry(usuarioTemp).Property(user => user.Telefone).IsModified = true;
+                _context.Entry(usuarioTemp).Property(u => u.Telefone).IsModified = true;
             }
 
-            if (usuario.ApartamentoId > 0 && usuarioTemp.ApartamentoId != usuario.ApartamentoId)
+            // ✅ Nível de Acesso
+            if (usuario.NivelAcesso.HasValue && usuarioTemp.NivelAcesso != usuario.NivelAcesso.Value)
             {
-                usuarioTemp.ApartamentoId = usuario.ApartamentoId;
-                _context.Entry(usuarioTemp).Property(user => user.ApartamentoId).IsModified = true;
+                usuarioTemp.NivelAcesso = usuario.NivelAcesso.Value;
+                _context.Entry(usuarioTemp).Property(u => u.NivelAcesso).IsModified = true;
+
+                if (usuario.NivelAcesso.Value == NivelAcessoEnum.Funcionario)
+                {
+                    usuarioTemp.ApartamentoId = null;
+                    _context.Entry(usuarioTemp).Property(u => u.ApartamentoId).IsModified = true;
+                }
             }
 
+            // ✅ Apartamento
+            if (usuarioTemp.NivelAcesso != NivelAcessoEnum.Funcionario)
+            {
+                if (usuario.ApartamentoId.HasValue && usuario.ApartamentoId > 0 && usuarioTemp.ApartamentoId != usuario.ApartamentoId)
+                {
+                    usuarioTemp.ApartamentoId = usuario.ApartamentoId;
+                    _context.Entry(usuarioTemp).Property(u => u.ApartamentoId).IsModified = true;
+                }
+                else if ((usuarioTemp.NivelAcesso == NivelAcessoEnum.Morador || usuarioTemp.NivelAcesso == NivelAcessoEnum.Sindico) && !usuario.ApartamentoId.HasValue)
+                {
+                    return BadRequest(new { mensagem = "Moradores e Síndicos precisam ter um apartamento associado." });
+                }
+            }
+
+            // ✅ Código RFID
             if (!string.IsNullOrEmpty(usuario.CodigoRFID) && usuario.CodigoRFID != "string" && usuarioTemp.CodigoRFID != usuario.CodigoRFID)
             {
                 usuarioTemp.CodigoRFID = usuario.CodigoRFID;
-                _context.Entry(usuarioTemp).Property(user => user.CodigoRFID).IsModified = true;
+                _context.Entry(usuarioTemp).Property(u => u.CodigoRFID).IsModified = true;
             }
 
+            // ✅ Status
             if (usuarioTemp.Status != usuario.Status)
             {
                 usuarioTemp.Status = usuario.Status;
-                _context.Entry(usuarioTemp).Property(user => user.Status).IsModified = true;
+                _context.Entry(usuarioTemp).Property(u => u.Status).IsModified = true;
             }
 
             await _context.SaveChangesAsync();
-
             return Ok(new { mensagem = "Usuário atualizado com sucesso." });
         }
+
+
 
         [HttpGet("BuscarPorRFID")]  // rota de verificar se a tag esta cadastrada
         public async Task<IActionResult> BuscarPorRFID([FromQuery] string rfid)
