@@ -16,8 +16,7 @@ namespace condominio_API.Models
         public Notificacao Notificacao { get; set; }
 
         // Quem executou a ação
-        [Required]
-        public int UsuarioId { get; set; }
+        public int? UsuarioId { get; set; }
         public Usuario Usuario { get; set; }
 
         // Tipo da ação
@@ -36,13 +35,13 @@ namespace condominio_API.Models
 
     public enum AcaoHistorico
     {
-        CRIACAO,
-        APROVACAO,
-        REJEICAO,
+        CRIACAO,  // comeca em 0
+        APROVACAO, // 1 
+        REJEICAO,  // 2
         COMENTARIO,
         LEITURA,
         PENDENTE,
         EM_ANDAMENTO,
-        CONCLUIDA
+        CONCLUIDA  //  7
     }
 }

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Condominio_API.Migrations
 {
     /// <inheritdoc />
-    public partial class migrationDB : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -25,6 +25,9 @@ namespace Condominio_API.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Numero = table.Column<int>(type: "int", nullable: false),
                     Proprietario = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Situacao = table.Column<int>(type: "int", nullable: false),
+                    Observacoes = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
@@ -48,7 +51,9 @@ namespace Condominio_API.Migrations
                     Cnpj = table.Column<string>(type: "varchar(14)", maxLength: 14, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     NomeEmpresa = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Status = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    PrestadorServico = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -68,15 +73,19 @@ namespace Condominio_API.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Email = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Senha = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                    Senha = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     NivelAcesso = table.Column<int>(type: "int", nullable: false),
                     Telefone = table.Column<string>(type: "varchar(15)", maxLength: 15, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    ApartamentoId = table.Column<int>(type: "int", nullable: false),
+                    ApartamentoId = table.Column<int>(type: "int", nullable: true),
                     CodigoRFID = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Status = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    Status = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsTemporaryPassword = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DataCadastro = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    FotoUrl = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -85,8 +94,7 @@ namespace Condominio_API.Migrations
                         name: "FK_Usuarios_Apartamentos_ApartamentoId",
                         column: x => x.ApartamentoId,
                         principalTable: "Apartamentos",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -97,7 +105,13 @@ namespace Condominio_API.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     UsuarioId = table.Column<int>(type: "int", nullable: false),
-                    DataHoraEntrada = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    DataHoraEntrada = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    EntradaPor = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Observacao = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    RegistradoPor = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -119,7 +133,13 @@ namespace Condominio_API.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     VisitanteId = table.Column<int>(type: "int", nullable: false),
                     UsuarioId = table.Column<int>(type: "int", nullable: false),
-                    DataHoraEntrada = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    DataHoraEntrada = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Observacao = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    RegistradoPor = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    EntradaPor = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -143,21 +163,20 @@ namespace Condominio_API.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    MoradorOrigemId = table.Column<int>(type: "int", nullable: false),
-                    ApartamentoDestinoId = table.Column<int>(type: "int", nullable: false),
-                    Mensagem = table.Column<string>(type: "longtext", nullable: false)
+                    Tipo = table.Column<int>(type: "int", nullable: false),
+                    Titulo = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    DataHora = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    Mensagem = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    DataCriacao = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UltimaAtualizacao = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    MoradorOrigemId = table.Column<int>(type: "int", nullable: false),
+                    CriadoPorSindico = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Notificacoes", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Notificacoes_Apartamentos_ApartamentoDestinoId",
-                        column: x => x.ApartamentoDestinoId,
-                        principalTable: "Apartamentos",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Notificacoes_Usuarios_MoradorOrigemId",
                         column: x => x.MoradorOrigemId,
@@ -168,7 +187,7 @@ namespace Condominio_API.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "QRCodeTemps",
+                name: "QRCodesTemp",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -178,23 +197,87 @@ namespace Condominio_API.Migrations
                     TipoQRCode = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     DataCriacao = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     DataValidade = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Status = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    Status = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    QrCodeImagem = table.Column<byte[]>(type: "longblob", nullable: false),
+                    QrCodeData = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_QRCodeTemps", x => x.Id);
+                    table.PrimaryKey("PK_QRCodesTemp", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_QRCodeTemps_Usuarios_MoradorId",
+                        name: "FK_QRCodesTemp_Usuarios_MoradorId",
                         column: x => x.MoradorId,
                         principalTable: "Usuarios",
                         principalColumn: "UsuarioId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_QRCodeTemps_Visitantes_VisitanteId",
+                        name: "FK_QRCodesTemp_Visitantes_VisitanteId",
                         column: x => x.VisitanteId,
                         principalTable: "Visitantes",
                         principalColumn: "VisitanteId",
                         onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "NotificacaoDestinatarios",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    NotificacaoId = table.Column<int>(type: "int", nullable: false),
+                    UsuarioDestinoId = table.Column<int>(type: "int", nullable: false),
+                    Lido = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NotificacaoDestinatarios", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_NotificacaoDestinatarios_Notificacoes_NotificacaoId",
+                        column: x => x.NotificacaoId,
+                        principalTable: "Notificacoes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_NotificacaoDestinatarios_Usuarios_UsuarioDestinoId",
+                        column: x => x.UsuarioDestinoId,
+                        principalTable: "Usuarios",
+                        principalColumn: "UsuarioId",
+                        onDelete: ReferentialAction.Restrict);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "NotificacaoHistoricos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    NotificacaoId = table.Column<int>(type: "int", nullable: false),
+                    UsuarioId = table.Column<int>(type: "int", nullable: true),
+                    Acao = table.Column<int>(type: "int", nullable: false),
+                    StatusAnterior = table.Column<int>(type: "int", nullable: true),
+                    StatusNovo = table.Column<int>(type: "int", nullable: true),
+                    Comentario = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    DataRegistro = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NotificacaoHistoricos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_NotificacaoHistoricos_Notificacoes_NotificacaoId",
+                        column: x => x.NotificacaoId,
+                        principalTable: "Notificacoes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_NotificacaoHistoricos_Usuarios_UsuarioId",
+                        column: x => x.UsuarioId,
+                        principalTable: "Usuarios",
+                        principalColumn: "UsuarioId",
+                        onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -214,9 +297,24 @@ namespace Condominio_API.Migrations
                 column: "VisitanteId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Notificacoes_ApartamentoDestinoId",
-                table: "Notificacoes",
-                column: "ApartamentoDestinoId");
+                name: "IX_NotificacaoDestinatarios_NotificacaoId",
+                table: "NotificacaoDestinatarios",
+                column: "NotificacaoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NotificacaoDestinatarios_UsuarioDestinoId",
+                table: "NotificacaoDestinatarios",
+                column: "UsuarioDestinoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NotificacaoHistoricos_NotificacaoId",
+                table: "NotificacaoHistoricos",
+                column: "NotificacaoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NotificacaoHistoricos_UsuarioId",
+                table: "NotificacaoHistoricos",
+                column: "UsuarioId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Notificacoes_MoradorOrigemId",
@@ -224,13 +322,13 @@ namespace Condominio_API.Migrations
                 column: "MoradorOrigemId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_QRCodeTemps_MoradorId",
-                table: "QRCodeTemps",
+                name: "IX_QRCodesTemp_MoradorId",
+                table: "QRCodesTemp",
                 column: "MoradorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_QRCodeTemps_VisitanteId",
-                table: "QRCodeTemps",
+                name: "IX_QRCodesTemp_VisitanteId",
+                table: "QRCodesTemp",
                 column: "VisitanteId");
 
             migrationBuilder.CreateIndex(
@@ -249,16 +347,22 @@ namespace Condominio_API.Migrations
                 name: "AcessoEntradaVisitantes");
 
             migrationBuilder.DropTable(
+                name: "NotificacaoDestinatarios");
+
+            migrationBuilder.DropTable(
+                name: "NotificacaoHistoricos");
+
+            migrationBuilder.DropTable(
+                name: "QRCodesTemp");
+
+            migrationBuilder.DropTable(
                 name: "Notificacoes");
 
             migrationBuilder.DropTable(
-                name: "QRCodeTemps");
+                name: "Visitantes");
 
             migrationBuilder.DropTable(
                 name: "Usuarios");
-
-            migrationBuilder.DropTable(
-                name: "Visitantes");
 
             migrationBuilder.DropTable(
                 name: "Apartamentos");

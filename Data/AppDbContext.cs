@@ -88,6 +88,7 @@ namespace condominio_API.Data
                 .HasOne(h => h.Usuario)
                 .WithMany()
                 .HasForeignKey(h => h.UsuarioId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<AtividadeView>()

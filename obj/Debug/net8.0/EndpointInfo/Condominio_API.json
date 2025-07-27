@@ -543,28 +543,19 @@
         }
       }
     },
-    "/api/Atividades/Recentes/{usuarioId}": {
+    "/api/Atividades/{id}/detalhes": {
       "get": {
         "tags": [
           "Atividades"
         ],
         "parameters": [
           {
-            "name": "usuarioId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "integer",
               "format": "int32"
-            }
-          },
-          {
-            "name": "limite",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 5
             }
           }
         ],
@@ -781,6 +772,18 @@
         }
       }
     },
+    "/api/Notificacao/AlertasRecentesAdmin": {
+      "get": {
+        "tags": [
+          "Notificacao"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Notificacao/{id}/detalhes": {
       "get": {
         "tags": [
@@ -794,6 +797,101 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Notificacao/{id}/comentarios": {
+      "get": {
+        "tags": [
+          "Notificacao"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Notificacao/ListarTodas": {
+      "get": {
+        "tags": [
+          "Notificacao"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Notificacao/BuscarNotificacaoPor": {
+      "get": {
+        "tags": [
+          "Notificacao"
+        ],
+        "parameters": [
+          {
+            "name": "tipo",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "bloco",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apartamento",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dataInicio",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "dataFim",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
             }
           }
         ],

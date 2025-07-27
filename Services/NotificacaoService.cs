@@ -17,28 +17,28 @@ namespace condominio_API.Services
         /// Edita uma notificação (status, comentário, leitura) e registra histórico.
         /// </summary>
         public async Task EditarNotificacao(
-            int notificacaoId,
-            int usuarioId,
-            StatusNotificacao? novoStatus = null,
-            string? novoComentario = null,
-            bool? marcarComoLida = null)
+    int notificacaoId,
+    int usuarioId,
+    StatusNotificacao? novoStatus = null,
+    string? novoComentario = null,
+    bool? marcarComoLida = null)
         {
-            // ✅ Inicia transação para garantir atomicidade
             await using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
                 var notificacao = await _context.Notificacoes.FindAsync(notificacaoId);
                 if (notificacao == null)
-                    throw new Exception("Notificação não encontrada");
+                    throw new Exception("Notificação não encontrada.");
 
                 var statusAnterior = notificacao.Status;
-                var comentarioAnterior = notificacao.ComentarioSindico;
+                bool statusAlterado = false;
 
-                // ✅ Atualiza status e registra histórico
+                // Atualiza status
                 if (novoStatus.HasValue && novoStatus.Value != notificacao.Status)
                 {
                     notificacao.Status = novoStatus.Value;
+                    statusAlterado = true;
 
                     await RegistrarHistorico(
                         notificacao.Id,
@@ -53,17 +53,17 @@ namespace condominio_API.Services
                         },
                         statusAnterior: statusAnterior,
                         statusNovo: novoStatus.Value,
-                        comentario: novoComentario);
+                        comentario: novoComentario // Comentário opcional no mesmo histórico
+                    );
                 }
 
-                // ✅ Atualiza comentário e registra histórico
-                if (!string.IsNullOrEmpty(novoComentario) && novoComentario != comentarioAnterior)
+                // Só salva comentário se NÃO foi salvo junto com status
+                if (!string.IsNullOrEmpty(novoComentario) && !statusAlterado)
                 {
-                    notificacao.ComentarioSindico = novoComentario;
                     await RegistrarHistorico(notificacao.Id, usuarioId, AcaoHistorico.COMENTARIO, comentario: novoComentario);
                 }
 
-                // ✅ Marca como lida (atualiza destinatário e histórico)
+                // Marca como lida
                 if (marcarComoLida == true)
                 {
                     var destinatario = await _context.NotificacaoDestinatarios
@@ -86,9 +86,10 @@ namespace condominio_API.Services
             catch
             {
                 await transaction.RollbackAsync();
-                throw; // Propaga a exceção para ser tratada pela controller
+                throw;
             }
         }
+
 
         /// <summary>
         /// Registra uma ação no histórico da notificação.
@@ -113,7 +114,7 @@ namespace condominio_API.Services
             };
 
             _context.NotificacaoHistoricos.Add(historico);
-            // ⚠️ NÃO chamamos SaveChanges aqui, porque é controlado pela transação no método principal
         }
     }
+
 }

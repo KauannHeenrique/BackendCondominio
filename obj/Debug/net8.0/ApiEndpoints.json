@@ -333,21 +333,16 @@
   },
   {
     "ContainingType": "condominio_API.Controllers.AtividadesController",
-    "Method": "GetAtividadesRecentes",
-    "RelativePath": "api/Atividades/Recentes/{usuarioId}",
+    "Method": "DetalhesNotificacao",
+    "RelativePath": "api/Atividades/{id}/detalhes",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "usuarioId",
+        "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
-      },
-      {
-        "Name": "limite",
-        "Type": "System.Int32",
-        "IsRequired": false
       }
     ],
     "ReturnTypes": []
@@ -368,6 +363,22 @@
       {
         "Name": "dto",
         "Type": "AtualizarNotificacaoRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "NotificacaoController",
+    "Method": "BuscarComentarios",
+    "RelativePath": "api/Notificacao/{id}/comentarios",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
         "IsRequired": true
       }
     ],
@@ -417,6 +428,57 @@
   },
   {
     "ContainingType": "NotificacaoController",
+    "Method": "GetAlertasRecentesAdmin",
+    "RelativePath": "api/Notificacao/AlertasRecentesAdmin",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "NotificacaoController",
+    "Method": "BuscarNotificacaoPor",
+    "RelativePath": "api/Notificacao/BuscarNotificacaoPor",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "tipo",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "status",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "bloco",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "apartamento",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "dataInicio",
+        "Type": "System.Nullable\u00601[[System.DateTime, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "dataFim",
+        "Type": "System.Nullable\u00601[[System.DateTime, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "NotificacaoController",
     "Method": "CriarNotificacao",
     "RelativePath": "api/Notificacao/CriarNotificacao",
     "HttpMethod": "POST",
@@ -429,6 +491,16 @@
         "IsRequired": true
       }
     ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "NotificacaoController",
+    "Method": "ListarTodas",
+    "RelativePath": "api/Notificacao/ListarTodas",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   },
   {

@@ -18,20 +18,59 @@ namespace condominio_API.Controllers
             _context = context;
         }
 
-        [HttpGet("Recentes/{usuarioId}")]
-        public IActionResult GetAtividadesRecentes(int usuarioId, int limite = 5)
+        [HttpGet("{id}/detalhes")]
+        public async Task<IActionResult> DetalhesNotificacao(int id)
         {
-            var atividades = _context.AtividadesRecentes
-                .Where(a => a.UsuarioId == usuarioId)
-                .OrderByDescending(a => a.DataRegistro)
-                .Take(limite)
-                .ToList();
+            var notificacao = await _context.Notificacoes
+                .Include(n => n.MoradorOrigem)
+                    .ThenInclude(m => m.Apartamento)
+                .Include(n => n.Destinatarios)
+                    .ThenInclude(d => d.UsuarioDestino)
+                .Include(n => n.Historico)
+                    .ThenInclude(h => h.Usuario)
+                .FirstOrDefaultAsync(n => n.Id == id);
 
-            return Ok(atividades);
+            if (notificacao == null)
+                return NotFound(new { mensagem = "Notificação não encontrada." });
+
+            var dto = new
+            {
+                Id = notificacao.Id,
+                Titulo = notificacao.Titulo,
+                Mensagem = notificacao.Mensagem,
+                Tipo = notificacao.Tipo,
+                Status = notificacao.Status,
+                DataCriacao = notificacao.DataCriacao,
+                UltimaAtualizacao = notificacao.UltimaAtualizacao,
+                CriadoPorSindico = notificacao.CriadoPorSindico,
+                MoradorOrigem = notificacao.MoradorOrigem != null ? new
+                {
+                    notificacao.MoradorOrigem.UsuarioId,
+                    notificacao.MoradorOrigem.Nome,
+                    Bloco = notificacao.MoradorOrigem.Apartamento?.Bloco,
+                    Apartamento = notificacao.MoradorOrigem.Apartamento?.Numero
+                } : null,
+                Destinatarios = notificacao.Destinatarios.Select(d => new
+                {
+                    UsuarioId = d.UsuarioDestinoId,
+                    Nome = d.UsuarioDestino?.Nome,
+                    Lido = d.Lido
+                }),
+                Historico = notificacao.Historico
+                    .Where(h => h.Acao != AcaoHistorico.PENDENTE) // ✅ Remove ações com Acao = 0
+                    .Select(h => new
+                    {
+                        h.Acao,
+                        h.StatusNovo,
+                        h.DataRegistro,
+                        h.Comentario,
+                        UsuarioNome = h.Usuario != null ? h.Usuario.Nome : "Usuário não encontrado",
+                        NivelAcesso = h.Usuario != null ? h.Usuario.NivelAcesso.ToString() : "Desconhecido"
+                    })
+            };
+
+            return Ok(dto);
         }
-
-
-
 
     }
 }

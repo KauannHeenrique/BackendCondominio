@@ -40,8 +40,6 @@ namespace condominio_API.Models
         [Required]
         public StatusNotificacao Status { get; set; } = StatusNotificacao.Pendente;
 
-        public string? ComentarioSindico { get; set; }
-
         public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
 
         public DateTime? UltimaAtualizacao { get; set; }

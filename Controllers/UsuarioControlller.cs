@@ -164,12 +164,24 @@ namespace condominio_API.Controllers
 
                 if (string.IsNullOrWhiteSpace(novoUsuario.Documento))
                 {
-                    return BadRequest(new { mensagem = "É necessário informar um documento (CPF)." });
+                    return BadRequest(new { mensagem = "É necessário informar um CPF." });
                 }
 
                 // Normaliza e-mail e documento
                 var emailNormalizado = novoUsuario.Email.Trim().ToLower();
-                var documentoNormalizado = novoUsuario.Documento.Trim();
+                var documentoNormalizado = new string(novoUsuario.Documento.Where(char.IsDigit).ToArray());
+
+                // ✅ Verifica se CPF tem 11 dígitos
+                if (documentoNormalizado.Length != 11)
+                {
+                    return BadRequest(new { mensagem = "CPF deve conter 11 dígitos." });
+                }
+
+                // ✅ Valida CPF
+                if (!ValidarCPF(documentoNormalizado))
+                {
+                    return BadRequest(new { mensagem = "CPF inválido." });
+                }
 
                 // Verifica se o e-mail já está em uso
                 var emailExistente = _context.Usuarios.Any(u => u.Email.ToLower() == emailNormalizado);
@@ -182,13 +194,16 @@ namespace condominio_API.Controllers
                 var documentoExistente = _context.Usuarios.Any(u => u.Documento == documentoNormalizado);
                 if (documentoExistente)
                 {
-                    return BadRequest(new { mensagem = "Documento (CPF) cadastrado." });
+                    return BadRequest(new { mensagem = "Documento (CPF) já cadastrado." });
                 }
 
                 // Define senha padrão
                 string senhaPadrao = "Condominio123";
                 novoUsuario.Senha = HashHelper.GerarHash(senhaPadrao);
+                novoUsuario.IsTemporaryPassword = true;
                 novoUsuario.DataCadastro = DateTime.UtcNow;
+                novoUsuario.Documento = documentoNormalizado; // ✅ Salva CPF sem máscara
+                novoUsuario.Email = emailNormalizado; // ✅ Salva email normalizado
 
                 _context.Usuarios.Add(novoUsuario);
                 await _context.SaveChangesAsync();
@@ -207,6 +222,50 @@ namespace condominio_API.Controllers
                 return StatusCode(500, new { mensagem = "Erro ao cadastrar usuário ou enviar e-mail.", detalhes = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Valida CPF pelo cálculo dos dígitos verificadores.
+        /// </summary>
+        private bool ValidarCPF(string cpf)
+        {
+            if (string.IsNullOrWhiteSpace(cpf)) return false;
+
+            // Remove caracteres não numéricos
+            cpf = new string(cpf.Where(char.IsDigit).ToArray());
+
+            if (cpf.Length != 11) return false;
+
+            // Verifica se todos os dígitos são iguais
+            if (cpf.All(c => c == cpf[0])) return false;
+
+            // Calcula dígito 1
+            int[] mult1 = { 10, 9, 8, 7, 6, 5, 4, 3, 2 };
+            int[] mult2 = { 11, 10, 9, 8, 7, 6, 5, 4, 3, 2 };
+
+            string tempCpf = cpf.Substring(0, 9);
+            int soma = 0;
+
+            for (int i = 0; i < 9; i++)
+                soma += int.Parse(tempCpf[i].ToString()) * mult1[i];
+
+            int resto = soma % 11;
+            resto = resto < 2 ? 0 : 11 - resto;
+
+            string digito = resto.ToString();
+            tempCpf += digito;
+
+            soma = 0;
+            for (int i = 0; i < 10; i++)
+                soma += int.Parse(tempCpf[i].ToString()) * mult2[i];
+
+            resto = soma % 11;
+            resto = resto < 2 ? 0 : 11 - resto;
+
+            digito += resto.ToString();
+
+            return cpf.EndsWith(digito);
+        }
+
 
 
 
@@ -281,19 +340,31 @@ namespace condominio_API.Controllers
                 }
             }
 
-            // ✅ Apartamento
-            if (usuarioTemp.NivelAcesso != NivelAcessoEnum.Funcionario)
+            // ✅ Validar e atualizar apartamento conforme novo nível de acesso
+            if (usuario.NivelAcesso.HasValue)
             {
-                if (usuario.ApartamentoId.HasValue && usuario.ApartamentoId > 0 && usuarioTemp.ApartamentoId != usuario.ApartamentoId)
+                if (usuario.NivelAcesso == NivelAcessoEnum.Funcionario)
                 {
-                    usuarioTemp.ApartamentoId = usuario.ApartamentoId;
+                    // Funcionário → remove vínculo com apartamento
+                    usuarioTemp.ApartamentoId = null;
                     _context.Entry(usuarioTemp).Property(u => u.ApartamentoId).IsModified = true;
                 }
-                else if ((usuarioTemp.NivelAcesso == NivelAcessoEnum.Morador || usuarioTemp.NivelAcesso == NivelAcessoEnum.Sindico) && !usuario.ApartamentoId.HasValue)
+                else if (usuario.NivelAcesso == NivelAcessoEnum.Morador || usuario.NivelAcesso == NivelAcessoEnum.Sindico)
                 {
-                    return BadRequest(new { mensagem = "Moradores e Síndicos precisam ter um apartamento associado." });
+                    // Morador/Síndico → precisa ter apartamento válido
+                    if (!usuario.ApartamentoId.HasValue)
+                    {
+                        return BadRequest(new { mensagem = "Moradores e Síndicos precisam ter um apartamento associado." });
+                    }
+
+                    if (usuarioTemp.ApartamentoId != usuario.ApartamentoId)
+                    {
+                        usuarioTemp.ApartamentoId = usuario.ApartamentoId;
+                        _context.Entry(usuarioTemp).Property(u => u.ApartamentoId).IsModified = true;
+                    }
                 }
             }
+
 
             // ✅ Código RFID
             if (!string.IsNullOrEmpty(usuario.CodigoRFID) && usuario.CodigoRFID != "string" && usuarioTemp.CodigoRFID != usuario.CodigoRFID)

@@ -160,9 +160,6 @@ namespace Condominio_API.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ComentarioSindico")
-                        .HasColumnType("longtext");
-
                     b.Property<bool>("CriadoPorSindico")
                         .HasColumnType("tinyint(1)");
 
@@ -250,7 +247,7 @@ namespace Condominio_API.Migrations
                     b.Property<int?>("StatusNovo")
                         .HasColumnType("int");
 
-                    b.Property<int>("UsuarioId")
+                    b.Property<int?>("UsuarioId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -482,8 +479,7 @@ namespace Condominio_API.Migrations
                     b.HasOne("condominio_API.Models.Usuario", "Usuario")
                         .WithMany()
                         .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Notificacao");
 
