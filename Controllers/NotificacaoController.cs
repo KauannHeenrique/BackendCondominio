@@ -235,11 +235,49 @@ public class NotificacaoController : ControllerBase
     /// ✅ Minhas Notificações
     [HttpGet("MinhasNotificacoes/{usuarioId}")]
     [Authorize]
-    public async Task<IActionResult> MinhasNotificacoes(int usuarioId, int page = 1, int pageSize = 20, [FromQuery] bool criadoPorSindico = false)
+    public async Task<IActionResult> MinhasNotificacoes(
+    int usuarioId,
+    int page = 1,
+    int pageSize = 20,
+    [FromQuery] bool criadoPorSindico = false,
+    [FromQuery] int? status = null,
+    [FromQuery] int? tipo = null,
+    [FromQuery] int? periodo = null, // ✅ Adiciona período
+    [FromQuery] DateTime? dataInicio = null,
+    [FromQuery] DateTime? dataFim = null
+)
     {
         var query = _context.Notificacoes
-            .Where(n => n.MoradorOrigemId == usuarioId && n.CriadoPorSindico == criadoPorSindico)
-            .OrderByDescending(n => n.DataCriacao);
+            .Where(n => n.MoradorOrigemId == usuarioId && n.CriadoPorSindico == criadoPorSindico);
+
+        if (status.HasValue && Enum.IsDefined(typeof(StatusNotificacao), status.Value))
+        {
+            query = query.Where(n => n.Status == (StatusNotificacao)status.Value);
+        }
+
+        if (tipo.HasValue && Enum.IsDefined(typeof(TipoNotificacao), tipo.Value))
+        {
+            query = query.Where(n => n.Tipo == (TipoNotificacao)tipo.Value);
+        }
+
+        // ✅ Aplica filtro por período (7 ou 30)
+        if (periodo.HasValue && periodo.Value > 0)
+        {
+            var dataLimite = DateTime.Now.AddDays(-periodo.Value);
+            query = query.Where(n => n.DataCriacao >= dataLimite);
+        }
+
+        // ✅ Se for personalizado, aplica range exato
+        if (dataInicio.HasValue)
+            query = query.Where(n => n.DataCriacao >= dataInicio.Value);
+
+        if (dataFim.HasValue)
+        {
+            var fimDia = dataFim.Value.Date.AddDays(1).AddTicks(-1);
+            query = query.Where(n => n.DataCriacao <= fimDia);
+        }
+
+        query = query.OrderByDescending(n => n.DataCriacao);
 
         var total = await query.CountAsync();
         var notificacoes = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
@@ -348,7 +386,7 @@ public class NotificacaoController : ControllerBase
         }
     }
 
-   
+
 
     [HttpGet("AlertasRecentesAdmin")]
     public async Task<IActionResult> GetAlertasRecentesAdmin()
@@ -356,7 +394,9 @@ public class NotificacaoController : ControllerBase
         try
         {
             var notificacoes = await _context.Notificacoes
-                .OrderByDescending(n => n.DataCriacao) // ordenar por mais recentes
+                .Include(n => n.MoradorOrigem) // Inclui usuário
+                    .ThenInclude(u => u.Apartamento) // Inclui apartamento vinculado ao usuário
+                .OrderByDescending(n => n.DataCriacao)
                 .Select(n => new
                 {
                     n.Id,
@@ -365,9 +405,15 @@ public class NotificacaoController : ControllerBase
                     n.Status,
                     n.Tipo,
                     n.DataCriacao,
-                    n.UltimaAtualizacao
+                    n.UltimaAtualizacao,
+                    Origem = new
+                    {
+                        Nome = n.MoradorOrigem.Nome,
+                        Bloco = n.MoradorOrigem.Apartamento != null ? n.MoradorOrigem.Apartamento.Bloco : null,
+                        Apartamento = n.MoradorOrigem.Apartamento != null ? n.MoradorOrigem.Apartamento.Numero.ToString() : null
+                    }
                 })
-                .Take(20) // limitar para não pesar demais
+                .Take(20)
                 .ToListAsync();
 
             return Ok(notificacoes);
@@ -377,9 +423,6 @@ public class NotificacaoController : ControllerBase
             return StatusCode(500, $"Erro ao buscar notificações recentes: {ex.Message}");
         }
     }
-
-
-
 
     /// ✅ Detalhes com histórico
     [HttpGet("{id}/detalhes")]

@@ -32,6 +32,7 @@ namespace condominio_API.Models
 
         [Required]
         [MaxLength(50)]
-        public string EntradaPor { get; set; } = "QRCode"; // QRCode ou Manual
+        public string EntradaPor { get; set; } = "Manual"; // QRCode ou Manual - está manual pq nao vou usar qrcode 
+                                            // caso nao de tempe de terminar
     }
 }

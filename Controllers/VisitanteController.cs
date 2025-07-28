@@ -28,28 +28,38 @@ namespace condominio_API.Controllers
         public async Task<ActionResult<IEnumerable<Visitante>>> GetVisitante(
     [FromQuery] int? id,
     [FromQuery] string? nomeVisitante,
+    [FromQuery] string? nomeEmpresa,
     [FromQuery] string? documento,
+    [FromQuery] string? cnpj,
     [FromQuery] string? telefone,
     [FromQuery] bool? status,
     [FromQuery] bool? prestadorServico)
         {
-            //Se ID for informado, ignora os outros filtros e retorna apenas esse visitante
+            // Se ID for informado, ignora os outros filtros e retorna apenas esse visitante
             if (id.HasValue)
             {
                 var visitante = await _context.Visitantes.FirstOrDefaultAsync(v => v.VisitanteId == id.Value);
                 if (visitante == null)
                     return NotFound(new { mensagem = "Visitante não encontrado." });
 
-                return Ok(visitante); // Retorna apenas um objeto, não uma lista
+                return Ok(visitante); // Retorna apenas um objeto
             }
 
             var query = _context.Visitantes.AsQueryable();
 
+            // Buscar por nome do visitante
             if (!string.IsNullOrWhiteSpace(nomeVisitante))
             {
                 query = query.Where(v => v.Nome.Contains(nomeVisitante));
             }
 
+            // Buscar por nome da empresa
+            if (!string.IsNullOrWhiteSpace(nomeEmpresa))
+            {
+                query = query.Where(v => v.NomeEmpresa.Contains(nomeEmpresa));
+            }
+
+            // Buscar por CPF ou CNPJ usando "documento"
             if (!string.IsNullOrWhiteSpace(documento))
             {
                 var docLimpo = new string(documento.Where(char.IsDigit).ToArray());
@@ -70,16 +80,26 @@ namespace condominio_API.Controllers
                 }
             }
 
+            // Buscar por CNPJ explicitamente
+            if (!string.IsNullOrWhiteSpace(cnpj))
+            {
+                var cnpjLimpo = new string(cnpj.Where(char.IsDigit).ToArray());
+                query = query.Where(v => v.Cnpj == cnpjLimpo);
+            }
+
+            // Buscar por telefone
             if (!string.IsNullOrWhiteSpace(telefone))
             {
                 query = query.Where(v => v.Telefone.Contains(telefone));
             }
 
+            // Status
             if (status.HasValue)
             {
                 query = query.Where(v => v.Status == status.Value);
             }
 
+            // Prestador de serviço
             if (prestadorServico.HasValue)
             {
                 query = query.Where(v => v.PrestadorServico == prestadorServico.Value);
@@ -94,7 +114,6 @@ namespace condominio_API.Controllers
 
             return Ok(visitantes);
         }
-
 
 
         [HttpPost("CadastrarVisitante")]

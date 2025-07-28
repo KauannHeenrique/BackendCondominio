@@ -111,7 +111,7 @@ namespace condominio_API.Controllers
             if (selecao.EntradasMorador)
             {
                 var dados = await _relatorioService.ObterEntradasMoradorParaRelatorio();
-                var planilha = package.Workbook.Worksheets.Add("Entradas Morador");
+                var planilha = package.Workbook.Worksheets.Add("Entradas Usuario");
                 GeradorRelatorio.PreencherPlanilhaEntradasMorador(planilha, dados);
             }
 
