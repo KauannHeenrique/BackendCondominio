@@ -1,0 +1,89 @@
+create database condominio_db;
+
+use condominio_db;
+
+DROP TABLE NotificacaoHistoricos;
+
+ALTER TABLE NotificacaoHistoricos MODIFY COLUMN UsuarioId INT NULL;
+
+UPDATE notificacoes
+SET Status = 3
+WHERE Id = 11;
+
+CREATE OR REPLACE VIEW vw_atividades_recentes AS
+-- Nova Notificação
+SELECT
+    N.Id AS ReferenciaId,  -- ✅ ID da Notificação
+    'Notificação' AS Tipo,
+    CASE N.Tipo
+        WHEN 1 THEN 'Aviso de barulho'
+        WHEN 2 THEN 'Solicitação de reparo'
+        WHEN 3 THEN 'Sugestão'
+        WHEN 4 THEN 'Outros'
+    END AS Descricao,
+    COALESCE(N.UltimaAtualizacao, N.DataCriacao) AS DataRegistro,
+    CASE N.Status
+        WHEN 1 THEN 'Pendente'
+        WHEN 2 THEN 'Aprovada'
+        WHEN 3 THEN 'Rejeitada'
+        WHEN 4 THEN 'Em andamento'
+        WHEN 5 THEN 'Concluída'
+    END AS Status,
+    N.MoradorOrigemId AS UsuarioId
+FROM Notificacoes N
+
+UNION ALL
+
+-- Atualização de Notificação
+SELECT
+    N.Id AS ReferenciaId,  -- ✅ Usamos o ID da Notificação original
+    'Atualização de Notificação' AS Tipo,
+    CASE N.Tipo
+        WHEN 1 THEN 'Aviso de barulho'
+        WHEN 2 THEN 'Solicitação de reparo'
+        WHEN 3 THEN 'Sugestão'
+        WHEN 4 THEN 'Outros'
+    END AS Descricao,
+    H.DataRegistro,
+    CASE H.StatusNovo
+        WHEN 1 THEN 'Pendente'
+        WHEN 2 THEN 'Aprovada'
+        WHEN 3 THEN 'Rejeitada'
+        WHEN 4 THEN 'Em andamento'
+        WHEN 5 THEN 'Concluída'
+    END AS Status,
+    H.UsuarioId
+FROM NotificacaoHistoricos H
+INNER JOIN Notificacoes N ON N.Id = H.NotificacaoId
+
+UNION ALL
+
+-- Entrada no condomínio
+SELECT
+    A.Id AS ReferenciaId,  -- ✅ ID da entrada
+    'Entrada' AS Tipo,
+    'Entrada no condomínio' AS Descricao,
+    A.DataHoraEntrada AS DataRegistro,
+    'Sucesso' AS Status,
+    A.UsuarioId
+FROM AcessoEntradaMoradores A;
+
+
+INSERT INTO usuarios (
+    Nome, Documento, Email, Senha, NivelAcesso, Telefone, ApartamentoId,
+    CodigoRFID, Status, IsTemporaryPassword, DataCadastro, FotoUrl
+)
+VALUES (
+    'Administrador',       -- Nome
+    '0',                -- Documento (CPF fictício)
+    'admin@condominio.com',       -- Email
+    '$2a$10$XXXXXXXXXXXXXXXXXXXX', -- Senha (hash BCrypt recomendado)
+    1,                             -- NivelAcesso (ex: 1 = Síndico/Admin)
+    '(11) 90000-0000',             -- Telefone
+    NULL,                          -- ApartamentoId (pode ser NULL para admin)
+    'RFID00000001',                -- Código RFID genérico
+    1,                             -- Status (1 = ativo)
+    0,                             -- IsTemporaryPassword
+    NOW(),                         -- DataCadastro
+    NULL                           -- FotoUrl
+);
