@@ -115,6 +115,71 @@ namespace condominio_API.Controllers
             return Ok(visitantes);
         }
 
+        private static bool IsValidCPF(string cpf)
+        {
+            if (string.IsNullOrWhiteSpace(cpf))
+                return false;
+
+            cpf = new string(cpf.Where(char.IsDigit).ToArray());
+
+            if (cpf.Length != 11 || cpf.Distinct().Count() == 1)
+                return false;
+
+            var numbers = cpf.Select(c => int.Parse(c.ToString())).ToArray();
+
+            int sum = 0;
+            for (int i = 0; i < 9; i++)
+                sum += numbers[i] * (10 - i);
+            int remainder = (sum * 10) % 11;
+            if (remainder == 10) remainder = 0;
+            if (remainder != numbers[9]) return false;
+
+            sum = 0;
+            for (int i = 0; i < 10; i++)
+                sum += numbers[i] * (11 - i);
+            remainder = (sum * 10) % 11;
+            if (remainder == 10) remainder = 0;
+            if (remainder != numbers[10]) return false;
+
+            return true;
+        }
+
+        private static bool IsValidCNPJ(string cnpj)
+        {
+            if (string.IsNullOrWhiteSpace(cnpj))
+                return false;
+
+            cnpj = new string(cnpj.Where(char.IsDigit).ToArray());
+
+            if (cnpj.Length != 14 || cnpj.Distinct().Count() == 1)
+                return false;
+
+            int[] multiplicador1 = new int[12] { 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 };
+            int[] multiplicador2 = new int[13] { 6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 };
+
+            string tempCnpj = cnpj.Substring(0, 12);
+            int sum = 0;
+
+            for (int i = 0; i < 12; i++)
+                sum += int.Parse(tempCnpj[i].ToString()) * multiplicador1[i];
+
+            int remainder = (sum % 11);
+            remainder = remainder < 2 ? 0 : 11 - remainder;
+
+            string digit = remainder.ToString();
+            tempCnpj += digit;
+            sum = 0;
+
+            for (int i = 0; i < 13; i++)
+                sum += int.Parse(tempCnpj[i].ToString()) * multiplicador2[i];
+
+            remainder = (sum % 11);
+            remainder = remainder < 2 ? 0 : 11 - remainder;
+
+            digit += remainder.ToString();
+
+            return cnpj.EndsWith(digit);
+        }
 
         [HttpPost("CadastrarVisitante")]
         public async Task<ActionResult<Visitante>> PostVisitante(Visitante NovoVisitante)
@@ -128,11 +193,29 @@ namespace condominio_API.Controllers
                     return BadRequest(new { mensagem = "Nome, Documento e Telefone são obrigatórios!" });
                 }
 
-                var visitanteExistente = await _context.Visitantes.FirstOrDefaultAsync(visit => visit.Documento == NovoVisitante.Documento && visit.Cnpj == NovoVisitante.Cnpj);
+                string documentoNumeros = new string(NovoVisitante.Documento.Where(char.IsDigit).ToArray());
+
+                bool documentoValido =
+                    documentoNumeros.Length == 11 ? IsValidCPF(documentoNumeros) :
+                    documentoNumeros.Length == 14 ? IsValidCNPJ(documentoNumeros) :
+                    false;
+
+                if (!documentoValido)
+                {
+                    return BadRequest(new { mensagem = "CPF ou CNPJ inválido!" });
+                }
+
+                var visitanteExistente = await _context.Visitantes.FirstOrDefaultAsync(
+                    visit => visit.Documento == NovoVisitante.Documento && visit.Cnpj == NovoVisitante.Cnpj);
 
                 if (visitanteExistente != null)
                 {
-                    return Ok(new { mensagem = "Visitante já cadastrado. Deseja gerar um QR code para esta visita?", visitante = visitanteExistente, gerarQrCode = true });
+                    return Ok(new
+                    {
+                        mensagem = "Visitante já cadastrado. Deseja gerar um QR code para esta visita?",
+                        visitante = visitanteExistente,
+                        gerarQrCode = true
+                    });
                 }
 
                 _context.Visitantes.Add(NovoVisitante);

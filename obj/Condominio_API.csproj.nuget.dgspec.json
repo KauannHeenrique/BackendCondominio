@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\workspace\\tcc\\tcc\\backend\\Condominio_API.csproj": {}
+    "C:\\Users\\acerv\\Source\\Repos\\BackendCondominio\\Condominio_API.csproj": {}
   },
   "projects": {
-    "C:\\workspace\\tcc\\tcc\\backend\\Condominio_API.csproj": {
+    "C:\\Users\\acerv\\Source\\Repos\\BackendCondominio\\Condominio_API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\workspace\\tcc\\tcc\\backend\\Condominio_API.csproj",
+        "projectUniqueName": "C:\\Users\\acerv\\Source\\Repos\\BackendCondominio\\Condominio_API.csproj",
         "projectName": "Condominio_API",
-        "projectPath": "C:\\workspace\\tcc\\tcc\\backend\\Condominio_API.csproj",
-        "packagesPath": "C:\\Users\\thiag\\.nuget\\packages\\",
-        "outputPath": "C:\\workspace\\tcc\\tcc\\backend\\obj\\",
+        "projectPath": "C:\\Users\\acerv\\Source\\Repos\\BackendCondominio\\Condominio_API.csproj",
+        "packagesPath": "C:\\Users\\acerv\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\acerv\\Source\\Repos\\BackendCondominio\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\thiag\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\acerv\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -43,7 +43,7 @@
         "restoreAuditProperties": {
           "enableAudit": "true",
           "auditLevel": "low",
-          "auditMode": "all"
+          "auditMode": "direct"
         },
         "SdkAnalysisLevel": "9.0.100"
       },
@@ -131,7 +131,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.101/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

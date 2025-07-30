@@ -1,15 +1,3 @@
-create database condominio_db;
-
-use condominio_db;
-
-DROP TABLE NotificacaoHistoricos;
-
-ALTER TABLE NotificacaoHistoricos MODIFY COLUMN UsuarioId INT NULL;
-
-UPDATE notificacoes
-SET Status = 3
-WHERE Id = 11;
-
 CREATE OR REPLACE VIEW vw_atividades_recentes AS
 -- Nova Notificação
 SELECT

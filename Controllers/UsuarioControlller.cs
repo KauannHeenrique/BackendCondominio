@@ -152,6 +152,37 @@ namespace condominio_API.Controllers
             return Ok(usuarios);
         }
 
+        public static bool IsValidCPF(string cpf)
+        {
+            if (string.IsNullOrWhiteSpace(cpf))
+                return false;
+
+            cpf = new string(cpf.Where(char.IsDigit).ToArray());
+
+            if (cpf.Length != 11 || cpf.Distinct().Count() == 1)
+                return false;
+
+            var numbers = cpf.Select(c => int.Parse(c.ToString())).ToArray();
+
+            int sum = 0;
+            for (int i = 0; i < 9; i++)
+                sum += numbers[i] * (10 - i);
+            int remainder = (sum * 10) % 11;
+            if (remainder == 10) remainder = 0;
+            if (remainder != numbers[9])
+                return false;
+
+            sum = 0;
+            for (int i = 0; i < 10; i++)
+                sum += numbers[i] * (11 - i);
+            remainder = (sum * 10) % 11;
+            if (remainder == 10) remainder = 0;
+            if (remainder != numbers[10])
+                return false;
+
+            return true;
+        }
+
         [HttpPost("CadastrarUsuario")]
         public async Task<IActionResult> CadastrarUsuario([FromBody] Usuario novoUsuario)
         {

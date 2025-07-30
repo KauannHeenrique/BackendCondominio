@@ -13,8 +13,20 @@ namespace condominio_API.Services
 
         public static bool VerificarHash(string hash, string senha)
         {
-            var result = hasher.VerifyHashedPassword(null, hash, senha);
-            return result == PasswordVerificationResult.Success;
+            if (string.IsNullOrWhiteSpace(hash) || string.IsNullOrWhiteSpace(senha))
+                return false;
+
+            try
+            {
+                var hasher = new PasswordHasher<string>();
+                var result = hasher.VerifyHashedPassword(null, hash, senha);
+                return result == PasswordVerificationResult.Success;
+            }
+            catch (FormatException ex)
+            {
+                Console.WriteLine($"Erro ao verificar hash: {ex.Message}");
+                return false;
+            }
         }
     }
 }
