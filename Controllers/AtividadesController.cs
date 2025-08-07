@@ -72,5 +72,18 @@ namespace condominio_API.Controllers
             return Ok(dto);
         }
 
+        [HttpGet("Recentes/{usuarioId}")]
+        public async Task<IActionResult> ObterRecentes(int usuarioId, [FromQuery] int limite = 5)
+        {
+            var atividades = await _context.Set<AtividadeView>()
+                .Where(a => a.UsuarioId == usuarioId)
+                .OrderByDescending(a => a.DataRegistro)
+                .Take(limite)
+                .ToListAsync();
+
+            return Ok(atividades);
+        }
+
+
     }
 }

@@ -183,7 +183,6 @@ public class NotificacaoController : ControllerBase
     }
 
     /// ✅ Atualizar Notificação (status, comentário, leitura)
-    /// ✅ Atualizar Notificação (status, comentário, leitura)
     [HttpPut("{id}/atualizar")]
     [Authorize]
     public async Task<IActionResult> AtualizarNotificacao(int id, [FromBody] AtualizarNotificacaoRequest dto)
@@ -196,9 +195,14 @@ public class NotificacaoController : ControllerBase
         // ✅ Valida permissões
         if (usuario.NivelAcesso == NivelAcessoEnum.Morador)
         {
-            // Morador só pode marcar como lida
-            if (dto.MarcarComoLida != true || dto.Status.HasValue || !string.IsNullOrEmpty(dto.Comentario))
-                return Forbid("Moradores só podem marcar notificações como lidas.");
+            bool comentarioValido = !string.IsNullOrWhiteSpace(dto.Comentario);
+            bool apenasComentario = comentarioValido && dto.Status == null && dto.MarcarComoLida != true;
+
+            // Morador pode adicionar comentário OU marcar como lida, mas não ambos ao mesmo tempo
+            if (!apenasComentario && dto.MarcarComoLida != true)
+            {
+                return Forbid("Moradores só podem comentar ou marcar notificações como lidas.");
+            }
         }
         else if (usuario.NivelAcesso != NivelAcessoEnum.Sindico && usuario.NivelAcesso != NivelAcessoEnum.Funcionario)
         {
@@ -298,27 +302,57 @@ public class NotificacaoController : ControllerBase
     int usuarioId,
     int page = 1,
     int pageSize = 20,
-    [FromQuery] bool criadoPorSindico = false)
+    [FromQuery] bool criadoPorSindico = false,
+    [FromQuery] int? status = null,
+    [FromQuery] int? tipo = null,
+    [FromQuery] int? periodo = null,
+    [FromQuery] DateTime? dataInicio = null,
+    [FromQuery] DateTime? dataFim = null)
     {
         if (page <= 0) page = 1;
         if (pageSize <= 0) pageSize = 20;
 
-        // Base da query
         var query = _context.NotificacaoDestinatarios
             .Include(d => d.Notificacao)
-            .Where(d => d.UsuarioDestinoId == usuarioId && d.Notificacao.CriadoPorSindico == criadoPorSindico)
-            .OrderByDescending(d => d.Notificacao.DataCriacao);
+            .Where(d => d.UsuarioDestinoId == usuarioId && d.Notificacao.CriadoPorSindico == criadoPorSindico);
 
-        // Conta total de notificações recebidas
+        // ✅ Filtros aplicados
+        if (status.HasValue && Enum.IsDefined(typeof(StatusNotificacao), status.Value))
+        {
+            query = query.Where(d => d.Notificacao.Status == (StatusNotificacao)status.Value);
+        }
+
+        if (tipo.HasValue && Enum.IsDefined(typeof(TipoNotificacao), tipo.Value))
+        {
+            query = query.Where(d => d.Notificacao.Tipo == (TipoNotificacao)tipo.Value);
+        }
+
+        if (periodo.HasValue && periodo.Value > 0)
+        {
+            var dataLimite = DateTime.UtcNow.AddDays(-periodo.Value);
+            query = query.Where(d => d.Notificacao.DataCriacao >= dataLimite);
+        }
+
+        if (dataInicio.HasValue)
+        {
+            query = query.Where(d => d.Notificacao.DataCriacao >= dataInicio.Value);
+        }
+
+        if (dataFim.HasValue)
+        {
+            var fimDia = dataFim.Value.Date.AddDays(1).AddTicks(-1);
+            query = query.Where(d => d.Notificacao.DataCriacao <= fimDia);
+        }
+
+        query = query.OrderByDescending(d => d.Notificacao.DataCriacao);
+
         var total = await query.CountAsync();
 
-        // Aplica paginação
         var destinatarios = await query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
 
-        // Seleciona apenas os dados necessários da notificação (para evitar payload gigante)
         var notificacoes = destinatarios.Select(d => new
         {
             d.Notificacao.Id,
@@ -328,7 +362,7 @@ public class NotificacaoController : ControllerBase
             d.Notificacao.Tipo,
             d.Notificacao.DataCriacao,
             d.Notificacao.UltimaAtualizacao,
-            Lido = d.Lido // Informação do destinatário
+            Lido = d.Lido
         });
 
         return Ok(new
@@ -339,6 +373,7 @@ public class NotificacaoController : ControllerBase
             notificacoes
         });
     }
+
 
     [HttpGet("AlertasAtivos/{usuarioId}")]
     public async Task<IActionResult> GetAlertasAtivos(int usuarioId)

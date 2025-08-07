@@ -348,6 +348,27 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "condominio_API.Controllers.AtividadesController",
+    "Method": "ObterRecentes",
+    "RelativePath": "api/Atividades/Recentes/{usuarioId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "usuarioId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "limite",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "NotificacaoController",
     "Method": "AtualizarNotificacao",
     "RelativePath": "api/Notificacao/{id}/atualizar",
@@ -586,6 +607,31 @@
         "Name": "criadoPorSindico",
         "Type": "System.Boolean",
         "IsRequired": false
+      },
+      {
+        "Name": "status",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "tipo",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "periodo",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "dataInicio",
+        "Type": "System.Nullable\u00601[[System.DateTime, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "dataFim",
+        "Type": "System.Nullable\u00601[[System.DateTime, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []
@@ -763,8 +809,8 @@
   },
   {
     "ContainingType": "condominio_API.Controllers.RelatorioController",
-    "Method": "GerarRelatorioNotificacoes",
-    "RelativePath": "api/relatorios/notificacoes",
+    "Method": "GerarRelatorioNotificacoesCompleto",
+    "RelativePath": "api/relatorios/notificacoes-completo",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -966,6 +1012,16 @@
         "IsRequired": true
       }
     ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "condominio_API.Controllers.UsuarioController",
+    "Method": "Logout",
+    "RelativePath": "api/Usuario/Logout",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   },
   {

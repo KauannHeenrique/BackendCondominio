@@ -52,13 +52,13 @@ namespace condominio_API.Controllers
 
             var token = new TokenService().GerarJwtToken(usuario);
 
-            // adiciona o token ao cookie 
-            Response.Cookies.Append("jwt", token, new CookieOptions
+            Response.Cookies.Append("auth_token", token, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false, // true apenas quando rodar em HTTPS
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddHours(1)
+                Secure = false, // ok para dev, mas use true em produção com HTTPS
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTimeOffset.UtcNow.AddHours(1),
+                Path = "/" // este é o valor padrão, mas vale explicitar
             });
 
             if (usuario.IsTemporaryPassword)
@@ -72,6 +72,22 @@ namespace condominio_API.Controllers
 
             return Ok(new { mensagem = "Login realizado com sucesso." });
         }
+
+        [HttpPost("Logout")]
+        public IActionResult Logout()
+        {
+            Response.Cookies.Delete("auth_token", new CookieOptions
+            {
+                HttpOnly = true, // não obrigatório aqui, mas não atrapalha
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
+                Path = "/" // MESMO PATH usado na criação
+            });
+
+            return Ok(new { mensagem = "Logout realizado com sucesso." });
+        }
+
+
 
 
         [Authorize]

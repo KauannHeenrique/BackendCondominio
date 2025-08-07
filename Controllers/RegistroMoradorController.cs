@@ -42,7 +42,7 @@ namespace condominio_API.Controllers
                 var novaEntrada = new AcessoEntradaMorador
                 {
                     UsuarioId = usuario.UsuarioId,
-                    DataHoraEntrada = DateTime.Now,
+                    DataHoraEntrada = DateTime.UtcNow,
                     EntradaPor = entradaMoradorReq.EntradaPor ?? "1"
                 };
 
@@ -388,7 +388,7 @@ namespace condominio_API.Controllers
             var novaEntrada = new AcessoEntradaMorador
             {
                 UsuarioId = request.UsuarioId,
-                DataHoraEntrada = DateTime.Now,
+                DataHoraEntrada = DateTime.UtcNow, 
                 EntradaPor = "2", 
                 Observacao = request.Observacao,
                 RegistradoPor = request.RegistradoPor

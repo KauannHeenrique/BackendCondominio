@@ -71,17 +71,34 @@ namespace condominio_API.Controllers
                         $"Relatorio_EntradasVisitante_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
 
-        [HttpGet("notificacoes")]
-        public async Task<IActionResult> GerarRelatorioNotificacoes()
+        [HttpGet("notificacoes-completo")]
+        public async Task<IActionResult> GerarRelatorioNotificacoesCompleto()
         {
-            var dados = await _relatorioService.ObterNotificacoesParaRelatorio();
-            var arquivo = GeradorRelatorio.GerarRelatorioNotificacoes(dados);
+            using var package = new ExcelPackage();
+
+            // 🟢 Aba 1 - Notificações
+            var notificacoes = await _relatorioService.ObterNotificacoesParaRelatorio();
+            var abaNotificacoes = package.Workbook.Worksheets.Add("Notificações");
+            GeradorRelatorio.PreencherPlanilhaNotificacoes(abaNotificacoes, notificacoes);
+
+            // 🟡 Aba 2 - Destinatários
+            var destinatarios = await _relatorioService.ObterDestinatariosAba();
+            var abaDestinatarios = package.Workbook.Worksheets.Add("Destinatários");
+            GeradorRelatorio.PreencherPlanilhaDestinatarios(abaDestinatarios, destinatarios);
+
+            // 🔵 Aba 3 - Histórico
+            var historico = await _relatorioService.ObterHistoricoAba();
+            var abaHistorico = package.Workbook.Worksheets.Add("Histórico");
+            GeradorRelatorio.PreencherPlanilhaHistorico(abaHistorico, historico);
+
+            var arquivo = package.GetAsByteArray();
 
             return File(arquivo,
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        $"Relatorio_Notificacoes_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"Relatorio_NotificacoesCompleto_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
         }
-        
+
+
         [HttpPost("multiplos")]
         public async Task<IActionResult> GerarRelatoriosSelecionados([FromBody] RelatorioMultiploRequest selecao)
         {

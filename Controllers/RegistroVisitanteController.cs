@@ -170,7 +170,11 @@ namespace condominio_API.Controllers
                 query = query.Where(e => e.DataHoraEntrada >= dataInicio.Value);
 
             if (dataFim.HasValue)
-                query = query.Where(e => e.DataHoraEntrada <= dataFim.Value);
+            {
+                var dataFimAjustada = dataFim.Value.Date.AddDays(1).AddTicks(-1); // até 23:59:59.9999999
+                query = query.Where(e => e.DataHoraEntrada <= dataFimAjustada);
+            }
+
 
             var entradas = await query
                 .OrderByDescending(e => e.DataHoraEntrada)

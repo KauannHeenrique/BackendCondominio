@@ -188,15 +188,19 @@ public static class GeradorRelatorio
         sheet.Cells[1, 7].Value = "Origem";
         sheet.Cells[1, 8].Value = "Destinos";
 
+        var zonaBrasilia = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
+
         for (int i = 0; i < notificacoes.Count; i++)
         {
             var n = notificacoes[i];
+            var dataCriacaoBrasilia = TimeZoneInfo.ConvertTimeFromUtc(n.DataCriacao, zonaBrasilia);
+
             sheet.Cells[i + 2, 1].Value = n.Id;
             sheet.Cells[i + 2, 2].Value = n.Titulo;
             sheet.Cells[i + 2, 3].Value = n.Tipo.ToString();
             sheet.Cells[i + 2, 4].Value = n.Mensagem;
             sheet.Cells[i + 2, 5].Value = n.Status.ToString();
-            sheet.Cells[i + 2, 6].Value = n.DataCriacao.ToString("dd/MM/yyyy HH:mm");
+            sheet.Cells[i + 2, 6].Value = dataCriacaoBrasilia.ToString("dd/MM/yyyy HH:mm");
             sheet.Cells[i + 2, 7].Value = n.MoradorOrigem?.Nome ?? "Desconhecido";
 
             // ✅ Monta a lista de destinos com Bloco-Número
@@ -206,6 +210,55 @@ public static class GeradorRelatorio
                 .ToList();
 
             sheet.Cells[i + 2, 8].Value = destinos.Any() ? string.Join(", ", destinos) : "-";
+        }
+
+        sheet.Cells.AutoFitColumns();
+    }
+
+
+    public static void PreencherPlanilhaDestinatarios(ExcelWorksheet sheet, List<NotificacaoDestinatario> destinatarios)
+    {
+        sheet.Cells[1, 1].Value = "ID";
+        sheet.Cells[1, 2].Value = "Notificação ID";
+        sheet.Cells[1, 3].Value = "Nome Destinatário";
+        sheet.Cells[1, 4].Value = "Bloco";
+        sheet.Cells[1, 5].Value = "Número";
+        sheet.Cells[1, 6].Value = "Status de Leitura";
+
+        for (int i = 0; i < destinatarios.Count; i++)
+        {
+            var d = destinatarios[i];
+            sheet.Cells[i + 2, 1].Value = d.Id;
+            sheet.Cells[i + 2, 2].Value = d.NotificacaoId;
+            sheet.Cells[i + 2, 3].Value = d.UsuarioDestino?.Nome ?? "Desconhecido";
+            sheet.Cells[i + 2, 4].Value = d.UsuarioDestino?.Apartamento?.Bloco;
+            sheet.Cells[i + 2, 5].Value = d.UsuarioDestino?.Apartamento?.Numero;
+            sheet.Cells[i + 2, 6].Value = d.Lido ? "Lido" : "Não Lido";
+        }
+
+        sheet.Cells.AutoFitColumns();
+    }
+
+    public static void PreencherPlanilhaHistorico(ExcelWorksheet sheet, List<NotificacaoHistorico> historico)
+    {
+        sheet.Cells[1, 1].Value = "ID";
+        sheet.Cells[1, 2].Value = "Notificação ID";
+        sheet.Cells[1, 3].Value = "Status Novo";
+        sheet.Cells[1, 4].Value = "Ação";
+        sheet.Cells[1, 5].Value = "Usuário";
+        sheet.Cells[1, 6].Value = "Data";
+        sheet.Cells[1, 7].Value = "Comentário";
+
+        for (int i = 0; i < historico.Count; i++)
+        {
+            var h = historico[i];
+            sheet.Cells[i + 2, 1].Value = h.Id;
+            sheet.Cells[i + 2, 2].Value = h.NotificacaoId;
+            sheet.Cells[i + 2, 3].Value = h.StatusNovo.ToString();
+            sheet.Cells[i + 2, 4].Value = h.Acao.ToString();
+            sheet.Cells[i + 2, 5].Value = h.Usuario?.Nome ?? "Sistema";
+            sheet.Cells[i + 2, 6].Value = h.DataRegistro.ToLocalTime().ToString("dd/MM/yyyy HH:mm");
+            sheet.Cells[i + 2, 7].Value = h.Comentario;
         }
 
         sheet.Cells.AutoFitColumns();

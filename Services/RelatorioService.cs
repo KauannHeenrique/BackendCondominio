@@ -62,5 +62,26 @@ namespace condominio_API.Services
                 .ToListAsync();
         }
 
+
+        public async Task<List<NotificacaoDestinatario>> ObterDestinatariosAba()
+        {
+            return await _context.NotificacaoDestinatarios
+                .Include(d => d.UsuarioDestino)
+                    .ThenInclude(u => u.Apartamento)
+                .Include(d => d.Notificacao)
+                .ToListAsync();
+        }
+
+        public async Task<List<NotificacaoHistorico>> ObterHistoricoAba()
+        {
+            return await _context.NotificacaoHistoricos
+                .Include(h => h.Notificacao)
+                .Include(h => h.Usuario)
+                .OrderByDescending(h => h.DataRegistro)
+                .ToListAsync();
+        }
+
+
+
     }
 }

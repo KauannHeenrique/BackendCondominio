@@ -566,6 +566,38 @@
         }
       }
     },
+    "/api/Atividades/Recentes/{usuarioId}": {
+      "get": {
+        "tags": [
+          "Atividades"
+        ],
+        "parameters": [
+          {
+            "name": "usuarioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 5
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Notificacao/CriarNotificacao": {
       "post": {
         "tags": [
@@ -767,6 +799,46 @@
             "schema": {
               "type": "boolean",
               "default": false
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "tipo",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "periodo",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "dataInicio",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "dataFim",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
             }
           }
         ],
@@ -1202,7 +1274,7 @@
         }
       }
     },
-    "/api/relatorios/notificacoes": {
+    "/api/relatorios/notificacoes-completo": {
       "get": {
         "tags": [
           "Relatorio"
@@ -1307,6 +1379,18 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Usuario/Logout": {
+      "post": {
+        "tags": [
+          "Usuario"
+        ],
         "responses": {
           "200": {
             "description": "OK"

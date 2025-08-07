@@ -65,7 +65,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             OnMessageReceived = context =>
             {
-                var token = context.HttpContext.Request.Cookies["jwt"];
+                var token = context.HttpContext.Request.Cookies["auth_token"];
                 if (!string.IsNullOrEmpty(token))
                     context.Token = token;
 

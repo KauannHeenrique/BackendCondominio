@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore;
     public class AtividadeView
     {
         public int ReferenciaId { get; set; }  // ✅ ADICIONE ISSO
-        public string Tipo { get; set; }
-        public string Descricao { get; set; }
+        public string? Tipo { get; set; }
+        public string? Descricao { get; set; }
         public DateTime? DataRegistro { get; set; } // <-- Aqui
-        public string Status { get; set; }
+        public string? Status { get; set; }
         public int UsuarioId { get; set; }
     }
 
